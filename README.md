@@ -1,107 +1,255 @@
-# 🛡️ SEMI-GUARD v3.0
-### 반도체 공정(SECOM) 불량 조기 탐지 & AI 통합 관제·데이터 분석 시스템
+# 🛡️ SEMI-GUARD: 반도체 공정 결함 진단 & 설비 예지보전 플랫폼
+### Semiconductor Fab Real-time Quality Control, XAI Diagnostics & Gemini AI Analysis Agent
 
+[![Live App](https://img.shields.io/badge/Live_Service-Cloud_Run_Deployed-4285F4?style=flat&logo=googlecloud&logoColor=white)](https://semiguard-app-ahftuulaqq-uc.a.run.app/)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![LightGBM](https://img.shields.io/badge/Model-LightGBM_Classifier-FF7F0E?style=flat)](https://lightgbm.readthedocs.io/)
-[![XAI](https://img.shields.io/badge/Explainability-SHAP_TreeExplainer-4B0082?style=flat)](https://github.com/slundberg/shap)
-[![LLM Agent](https://img.shields.io/badge/AI_Agent-Gemini_3.8_Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Champion Model](https://img.shields.io/badge/Champion_Model-Enhanced_LightGBM-FF7F0E?style=flat)](artifacts/)
+[![XAI Engine](https://img.shields.io/badge/Explainability-SHAP_TreeExplainer-4B0082?style=flat)](https://github.com/slundberg/shap)
+[![LLM Agent](https://img.shields.io/badge/AI_Agent-Gemini_3.8_Flash-EA4335?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Tests](https://img.shields.io/badge/Pytest-48_Passed-brightgreen?style=flat&logo=pytest&logoColor=white)](tests/)
+
+> 🌐 **실시간 웹 서비스**: [https://semiguard-app-ahftuulaqq-uc.a.run.app/](https://semiguard-app-ahftuulaqq-uc.a.run.app/)  
+> *(첫 화면에서 **[👷 엔지니어 데모]** 또는 **[👨‍💼 관리자 데모]** 클릭 시 즉시 체험 가능)*
 
 ---
 
-## 📌 프로젝트 소개 (Overview)
+## 📌 1. 프로젝트 개요 (Overview)
 
-**SEMI-GUARD v3.0**은 반도체 웨이퍼 제조 공정의 590개 센서 데이터(SECOM)를 바탕으로 **불량 웨이퍼를 조기에 탐지**하고, **XAI(SHAP)와 LLM 에이전트를 결합하여 이상 원인을 과학적으로 진단·관제**하는 엔터프라이즈 AI 시스템입니다.
+반도체 팹(Fab)은 단 하나의 불량 웨이퍼가 후공정으로 유출되어도 수십억 원의 막대한 경제적 손실을 초래하는 극도로 정밀한 산업입니다.
 
-기존의 정적 대시보드나 환각(Hallucination) 위험이 있는 일반 LLM 챗봇을 탈피하여, **엄격한 데이터 무결성 계약**과 **12종의 검증된 Python 분석 도구(Tools)**를 기반으로 동작하는 **Gemini 3.8 Flash 분석 에이전트**를 탑재했습니다.
+**SEMI-GUARD**는 SECOM 공정의 **590개 고차원 센서 데이터**와 **극심한 14:1 클래스 불균형(불량률 6.64%)**이라는 기술적 한계를 극복하고, **Enhanced LightGBM 챔피언 모델**, **실시간 센서 표류(Drift) 예지보전(PdM)**, **투트랙 SHAP 설명성(XAI)**, 나아가 **Gemini 3.8 Flash 자율 데이터 분석 에이전트**를 결합하여 엔드투엔드로 구축한 반도체 특화 종합 관제 솔루션입니다.
 
 ```
-[CSV 센서 데이터 업로드] ──▶ [저장된 모델 추론 (LightGBM)] ──▶ [원본+예측 DB 영속 저장]
-                                                                        │
-        ┌───────────────────────────────────────────────────────────────┴───────────────────────────────┐
-        ▼                                                                                               ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       SEMI-GUARD 통합 파이프라인                                        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ [590개 센서 계측] ──▶ [Median Imputation] ──▶ [Enhanced LightGBM] ──▶ [위험점수 산출 & Top 20% 선별]
+                                                          │
+          ┌───────────────────────────────────────────────┴───────────────────────────────────────────────┐
+          ▼                                                                                               ▼
 ┌──────────────────────────────────────────────┐                ┌──────────────────────────────────────────────┐
-│          🧪 CSV 분석실 (EDA Lab)             │                │        🎛️ 공정 관제 대시보드 (Control)       │
-│  - 590개 센서 자동 품질/결측 진단            │                │  - 기간별·월별 불량률 및 7일 이동평균 추이   │
-│  - 표본별 SHAP 워터폴 & Top 5 센서 정밀진단  │                │  - Top-K% 검토 성능 평가 & Confusion Matrix  │
-│  - Gemini 에이전트 Tool 기반 자연어 질의응답 │                │  - 엔지니어 수동 점검 발령 및 승인 결재 체계 │
+│       🧑‍🏭 현장 엔지니어 전용 관제 센터       │                │        👨‍💼 공정 관리자 5대 관제 센터         │
+│  • 초고속 불량 센서 정밀 진단실 (Wafer Triage)│                │  • 7일 롤링 이동평균 & 월별 수율 모니터링    │
+│  • 진짜 불량(TP) vs 가양성(FP) 투트랙 SHAP   │                │  • 5%~50% 우선검토 곡선 & Confusion Matrix   │
+│  • 챔버 노후화 일상 점검표 & 4단계 실시간 PdM│                │  • Tri-Criteria 센서 드리프트 & 챔버 인터록  │
+│  • Gemini 3.8 Flash 자율 분석 챗봇           │                │  • 12종 Python Analysis Tools 기반 자율 분석 │
 └──────────────────────────────────────────────┘                └──────────────────────────────────────────────┘
 ```
 
 > [!NOTE]
-> **핵심 원칙 (AGENTS.md 준수)**: 신규 CSV 데이터에 대해 모델을 재학습(fit)하지 않으며, 사전에 검증된 저장 전처리(transform)와 저장 모델(LightGBM)로만 추론합니다. 오류나 미확인 라벨, SHAP 값을 임의의 가짜 데모 값으로 대체하지 않고 정확한 계산 근거만을 제공합니다.
+> **엄격한 데이터 무결성 원칙 (AGENTS.md 준수)**: 신규 CSV 데이터에 대해 모델을 재학습(fit)하지 않으며, 사전에 검증된 저장 전처리(transform)와 저장 모델(LightGBM)로만 일관성 있게 추론합니다. 오류나 미확인 라벨, SHAP 값을 가짜 데모 값으로 대체하지 않고 정확한 수치 근거만을 산출합니다.
 
 ---
 
-## 🖼️ 시스템 화면 미리보기 (Showcase)
+## 🖥️ 2. 최신 실시간 서비스 화면 쇼케이스 (Live Showcase)
 
-SEMI-GUARD는 **데이터 과학자를 위한 정밀 탐색 분석실**과 **공정 엔지니어/관리자를 위한 실시간 관제 대시보드** 두 가지 인터페이스를 제공합니다.
+현재 배포 및 운영 중인 SEMI-GUARD의 실제 현장 운영 화면입니다.
 
-### 1. CSV 분석실: 자동 기본 분석 (EDA)
-> CSV를 업로드하거나 시뮬레이션 배치를 선택하면 즉시 590개 센서의 결측률, 라벨 불량률, 위험도 분포를 자동 산출합니다.
+### 2.1 🧑‍🏭 현장 엔지니어 전용 관제 센터 (Field Engineer Hub)
+> 클린룸 작업대나 설비 현장에서 직관적이고 빠르게 조치할 수 있는 2x2 카드 기반 관제 허브입니다. 실시간 진단실, 챔버 점검표, SHAP 1:1 비교, AI 분석 챗봇으로 즉시 전환됩니다.
 
-![CSV 분석실 기본 분석](docs/demo/01_basic_analysis.jpg)
-
----
-
-### 2. Gemini 3.8 Flash 기반 데이터 분석 에이전트
-> 자연어로 질문하면 LLM이 필요한 Python 분석 Tool을 직접 호출(Function Calling)하고, **실제 계산된 수치 근거(JSON)를 바탕으로 신뢰성 있는 답변**을 생성합니다.
-
-![Gemini AI 에이전트 질의응답](docs/demo/02_gemini_agent.jpg)
+![현장 엔지니어 전용 관제 센터](docs/demo/01_live_hub_engineer.png)
 
 ---
 
-### 3. 통합 공정 관제 대시보드 (Control Center Hub)
-> 기간별 수율 및 불량률 추이, 7일 이동평균, 위험 웨이퍼 목록, 공정 점검 지시 및 승인 워크플로우를 한곳에서 관리합니다.
+### 2.2 ⚡ 초고속 불량 센서 정밀 진단실 (Wafer Triage)
+> 의심 웨이퍼(예: #3295) 번호를 입력하면 즉시 **위험도 게이지(Risk Score)**, **TreeExplainer 기반 SHAP 인공지능 원인 분해 워터폴**, 그리고 **정상 기준선 대비 5대 공정 이탈 센서 목록 및 현장 조치 가이드**를 실시간으로 출력합니다.
 
-![공정 관제 대시보드 허브](docs/demo/03_dashboard_hub.jpg)
-
----
-
-### 4. 검토 비율(Top-K%)별 모델 성능 & 혼동행렬 탐색
-> 한정된 검사 자원 환경에서 검토 비율(5%~50%)에 따른 Recall, Precision, Lift 변화를 분석하고 전체 표본의 TP/FP/FN/TN을 즉시 조회합니다.
-
-![검토 비율별 성능 분석](docs/demo/05_dashboard_performance.jpg)
+![초고속 불량 센서 정밀 진단실](docs/demo/02_live_wafer_triage.png)
 
 ---
 
-### 5. 웨이퍼 표본 정밀진단 & SHAP Waterfall 설명
-> 개별 웨이퍼(Sample ID)의 Top 5 이상 센서 상태(정상 5~95% 구간 대비 이탈 여부)와 누적 SHAP 기여도 워터폴 차트를 통해 오탐(FP)과 진성불량(TP)을 명확히 판별합니다.
+### 2.3 🧠 SHAP 원인 분석 요약: 진짜 불량(TP) vs 가양성(FP) 해명
+> 단순한 예측에 그치지 않고, **실제 불량 웨이퍼(TP #3215)**와 모델이 보수적 안전마진으로 감지한 **정상 웨이퍼(FP #3295)**의 핵심 센서 기여도를 1:1로 맞대응하여 엔지니어에게 명확한 진단 근거를 제시합니다.
 
-![웨이퍼 표본 정밀진단](docs/demo/06_wafer_detail.jpg)
+![SHAP 원인 분석 요약 1:1 대조](docs/demo/03_live_shap_comparison.png)
 
 ---
 
-## 🏗️ 시스템 아키텍처 & 워크플로우
+### 2.4 🎯 AI 모델 종합 성과 시뮬레이션 (검토 비율별 성과표 & 혼동행렬)
+> 팹의 일일 계측 장비 한계를 고려하여, 검토 비율(5% ~ 50%) 조정에 따른 혼동행렬(Confusion Matrix), Recall(적발률), Precision(정밀도), Lift(검출 배수) 변화를 정량적으로 시뮬레이션합니다.
 
-### 1. 서비스 아키텍처 (Service Architecture)
-SEMI-GUARD의 전체 계층 구조와 Gemini AI Agent의 Tool 호출 루프를 나타냅니다.
+![AI 모델 종합 성과](docs/demo/04_live_model_performance.png)
+
+---
+
+### 2.5 🛠️ 챔버 노후화 일상 점검표 & 4단계 실시간 PdM 스케줄
+> 센서 드리프트 이상 징후 감지 시 자동으로 발령되는 4단계 스케줄 파이프라인(긴급 점검 발령 ➔ 현장 실사 및 점검 ➔ 관리자 승인 대기 ➔ 최종 승인 및 가동) 및 건식 식각(Dry Etch) 챔버 포커스링 마모 점검 체크리스트를 관리합니다.
+
+![챔버 노후화 일상 점검표](docs/demo/05_live_chamber_pdm.png)
+
+---
+
+### 2.6 🤖 Gemini 3.8 Flash 자율 데이터 분석 챗봇 (SEMI-AI Agent)
+> 정적 위키나 환각 위험이 있는 일반 챗봇을 탈피하여, 자연어 질문 시 **12종의 Python 분석 Tool을 직접 호출(Function Calling)**하여 실제 데이터 연산 결과(JSON)를 근거로 실시간 답변을 제공합니다. `[월별 불량률]`, `[검토 성능]`, `[드리프트 센서]` 추천 프리셋 및 자유 자연어 질의를 지원합니다.
+
+<p align="center">
+  <img src="docs/demo/06_live_ai_agent.png" alt="SEMI-AI 공정 분석 챗봇" width="420">
+</p>
+
+```json
+// Gemini 3.8 Flash 실제 Tool 호출 및 수치 근거 반환 예시
+{
+  "tool_call": "diagnose_sample",
+  "arguments": { "sample_id": "3295" },
+  "execution_result": {
+    "risk_score": 0.0197,
+    "top_deviation_sensors": ["feature_212 (+5.02σ)", "feature_38 (-4.26σ)", "feature_171 (+2.40σ)"],
+    "cumulative_shap": 0.73,
+    "verdict": "FP 안전마진 경보 (임피던스 이상 감지, 불필요한 폐기 방지 권고)"
+  }
+}
+```
+
+---
+
+## 📊 3. 모델링 및 단계별 비교 최적화 과정 (ML Engineering)
+
+반도체 SECOM 데이터셋의 3대 난제를 극복하기 위해 수행한 체계적인 머신러닝 모델링 여정입니다.
+
+```
+[원천 1,567행 x 590열]
+         │
+         ▼ (1단계: 층화 8:2 분할 & Skewness 극복 Median 대치 & 3단계 노이즈 피처 정제)
+[정제된 232개 피처]
+         │
+         ▼ (2단계: RobustScaler 표준화 & L1 LASSO 규제 ➔ 82.5% 노이즈 가중치 0화)
+[최정예 78개 핵심 센서 풀]
+         │
+         ▼ (3단계: 20:1 비대칭 비용 손실함수 & abnormal_sensor_count 도메인 파생변수 생성)
+[6종 모델 벤치마크] ──▶ 🏆 Enhanced LightGBM 챔피언 선정 (Recall@20% 71.4%, PR-AUC 0.2831)
+```
+
+---
+
+### 3.1 모델링 데이터의 3대 핵심 난제 (EDA)
+
+반도체 공정 데이터는 일반적인 머신러닝 데이터셋과 완전히 다른 3대 공학적 난제를 내포하고 있습니다.
+
+| 핵심 난제 | 실측 현황 및 문제점 | 공학적 해결책 |
+|---|---|---|
+| **1. 극단적 클래스 불균형** | 정상 1,463장(93.36%) vs **불량 104장(6.64%)**<br>모두 정상으로 예측해도 정확도 93.4%가 나오는 **다수 범주 편향** 발생 | 층화 분할(Stratified Split) & 비용 민감 가중치 (`scale_pos_weight=5.0`) |
+| **2. 590개 고차원 노이즈 & 결측** | 센서 40% 이상 왜도 2.0+ 및 특정 센서 결측률 60% 도달<br>극심한 다중공선성과 노이즈로 인한 과적합 위험 | 왜도 극복 **중앙값 대체(Median Imputation)** & 3단계 피처 정제 (590 ➔ 232개) |
+| **3. 비대칭 오분류 손실 (20:1)** | 재검사 비용(FP=1) 대비 **불량 칩 유출 손실(FN=20)**이 20배 막대함 | 비대칭 손실 함수 수립 (`Cost = 1×FP + 20×FN`) & 최적 임계값 0.19 하향 |
+
+| 그림 1. 극단적 클래스 불균형 (14:1) | 그림 2. 상위 20개 센서 결측치 분포 |
+|:---:|:---:|
+| ![클래스 불균형](picture/V01_클래스_불균형_분포.png) | ![결측치 분포](picture/V02_결측률_상위20개_센서.png) |
+
+---
+
+### 3.2 1단계: 데이터 정합성 검증 & 전처리 (590 ➔ 232개)
+
+1. **층화 8:2 분할 (Stratified Split)**:
+   - Train 1,253장 (불량 83) / Test 314장 (불량 21)으로 격리하여 6.64% 불량 비율을 엄격 보존.
+2. **왜도(Skewness) 극복 중앙값 대치 (Median Imputation)**:
+   - 센서의 40% 이상이 긴 꼬리를 갖는 왜도 2.0+ 분포를 보였습니다. 이상치에 취약한 평균(Mean) 대신 **중앙값(Median)**을 채택하여 통계 왜곡을 원천 차단했습니다.
+3. **3단계 체계적 피처 정제 (Feature Pruning)**:
+   - ① 결측률 50% 초과 센서 28개 제거
+   - ② 분산이 0인 단일값(상수) 센서 116개 제거
+   - ③ 상관계수 0.95 초과 다중공선성 센서 214개 제거
+   - ➔ **총 358개 노이즈 피처를 소거하고 232개의 고품질 유효 센서 풀을 확정**.
+
+![센서 왜도 및 중앙값 대체](picture/왜도_이상치_평균_중앙값_비교.png)
+
+---
+
+### 3.3 2단계: 4대 스케일러 벤치마크 & L1 LASSO 규제
+
+스파이크 이상치가 빈번한 반도체 챔버 특성에 맞추어 4대 스케일러를 동일 조건에서 벤치마크했습니다.
+
+| 스케일러 | 변환 방식 | Test 불량 재현율 (Recall) | 선정 결과 |
+|---|---|:---:|:---:|
+| **StandardScaler** | 평균 0, 분산 1 표준정규분포 | 19.0% | 탈락 (이상치에 의해 중심점 왜곡) |
+| **MinMaxScaler** | 0~1 고정 범위 정규화 | 14.3% | 탈락 (극단적 이상치로 대다수 데이터 압축) |
+| **QuantileTransformer** | 분위수 기반 균등 분포 변환 | 19.0% | 탈락 (비선형 왜곡 과다) |
+| 🏆 **RobustScaler** | **중앙값 & 사분위수 범위(IQR)** | **23.8%** | **최종 채택 (이상치 저항성 최우수)** |
+
+- **L1 LASSO Sparsity 효과**:
+  - 잔여 232개 센서의 노이즈를 추가 제거하기 위해 L1 규제를 적용했습니다.
+  - 불필요한 가중치를 정확히 `0.0`으로 수렴시켜 **유효 가중치 446개 중 82.5%(368개)를 완벽 소거**하고, **최정예 78개 핵심 센서**만으로 모델을 경량화했습니다.
+
+---
+
+### 3.4 3단계: 도메인 특화 파생변수 & 20:1 경제적 비용 행렬
+
+1. **도메인 특화 파생변수 (`abnormal_sensor_count`)**:
+   - 정상 웨이퍼 1,170장의 5~95 백분위수 관리 한계선(UCL/LCL)을 기준으로, **한계를 이탈한 이상 센서의 총합을 카운팅하는 파생변수**를 생성하여 다중 센서 복합 결함 신호를 강화했습니다.
+2. **비대칭 비용 행렬 및 결정론적 컷오프**:
+   - `Cost = 1×FP + 20×FN` 손실 구조를 수립하고, 분류 임계값을 기본 0.5에서 **0.19로 하향 조정**하여 불량 누락(FN)을 17개에서 6개로 65% 격감시켰습니다.
+   - 팹의 일일 계측 장비 용량에 맞춰 Test 314장 중 **상위 20%(63장)**를 물리적 전수 검사 대상으로 선별하는 정책을 수립했습니다.
+
+---
+
+### 3.5 4단계: 6종 머신러닝 모델 벤치마크 및 챔피언 선정
+
+동일한 평가 환경(Test 314장, 불량 21장)에서 6개 모델을 전수 벤치마크했습니다.
+
+| 벤치마크 모델명 | 상위 20% 불량 포획 수 | Recall@20% | PR-AUC | 총 경제적 비용 | 평가 및 선정 사유 |
+|---|:---:|:---:|:---:|:---:|---|
+| **L1 Logistic Regression** | 12 / 21 | 57.1% | 0.1758 | 198 | 선형 기준 모델 (비선형 상호작용 한계) |
+| **Random Forest Classifier** | 11 / 21 | 52.4% | 0.1642 | 214 | 트리 분할 깊이 한계로 탈락 |
+| **LightGBM (기본 설정)** | 10 / 21 | 47.6% | 0.1580 | 231 | 클래스 불균형 미보정으로 탈락 |
+| **LightGBM (`scale_pos_weight=5`)** | 13 / 21 | 61.9% | 0.2104 | 176 | 불균형 가중치로 성능 대폭 개선 |
+| 🏆 **Enhanced LightGBM (+파생변수)** | **15 / 21** | **71.4%** | **0.2831** | **137** | **최종 챔피언 (포획률 71.4%, PR-AUC +61% 향상)** |
+| **LambdaMART (`LightGBMRanker`)** | 9 / 21 | 42.9% | 0.1412 | 249 | 랭킹 쌍 희소성으로 그래디언트 붕괴 발생 |
+
+> [!TIP]
+> **🏆 Enhanced LightGBM 챔피언 승리 요인**:
+> 1. 정상 한계선 이탈 센서 총합인 `abnormal_sensor_count` 파생변수가 복합 결함 신호를 강력하게 포착.
+> 2. `scale_pos_weight=5.0` 설정을 통해 불량 클래스에 5배 가중치를 부여하여 다수 범주 편향 극복.
+> 3. 기준 모델 대비 PR-AUC가 **0.1758에서 0.2831로 61% 수직 상승**하고 경제적 총손실 비용을 최저(137)로 절감.
+
+---
+
+### 3.6 5단계: 설비 예지보전(PdM) 드리프트 엔진 & Tri-Criteria 알고리즘
+
+시계열 분석 결과, 평소 5~6%이던 불량률이 특정 기간에 15.8%까지 수직 폭증하는 비상사태가 발생했습니다. 원인 역추적 결과 CVD 증착 챔버의 전극 마모 및 히터 열화가 원인이었습니다.
+
+사후 정비(Breakdown Maintenance)를 탈피하기 위해 **Tri-Criteria 센서 표류 감지 알고리즘**을 개발했습니다:
+- **조건 1**: 시간 상관계수 `|r| >= 0.25`
+- **조건 2**: Z-Score 표준화 편차 `|ΔZ| >= 1.0σ`
+- **조건 3**: 이상치 비율 증가 `ΔOutlier >= 5%p`
+
+위 3가지 조건을 동시 충족할 때 조기 경보를 발령하여, **CVD 챔버 압력 상승 및 에처 RF 파워 하강 표류를 설비 고장 2~3주 전에 포획**합니다.
+
+![센서 드리프트 상승 및 하강 비교](picture/Day3_상승_하강_센서드리프트_비교.png)
+
+---
+
+### 3.7 6단계: 글로벌 센서 중요도 (Global SHAP XAI)
+
+TreeExplainer로 계산된 전체 데이터셋의 글로벌 SHAP 중요도를 통해, 공정 전체의 수율을 지배하는 Top 핵심 센서군을 규명했습니다.
+
+![글로벌 SHAP 중요도](picture/Day3_고도화_SHAP_글로벌_센서중요도.png)
+
+---
+
+## 🏗️ 4. 시스템 아키텍처 & 워크플로우
+
+### 4.1 서비스 아키텍처 (Service Architecture v3.0)
+FastAPI 기반 비동기 백엔드와 Gemini 3.8 Flash 자율 분석 에이전트의 구조도입니다.
 
 ![서비스 워크플로우](docs/assets/service_workflow_v3.png)
 
-- **UI 계층**: HTML/Vanilla JS 기반의 고반응성 경량 웹 인터페이스 (CSV 분석실 `/`, 공정 관제 `/dashboard/`).
-- **API 계층**: FastAPI 기반 REST 엔드포인트 및 브라우저 세션 쿠키 기반 데이터셋 격리.
-- **분석 에이전트 계층**: Gemini 3.8 Flash의 Function Calling을 활용한 최대 6회 반복 Tool 호출 루프.
-- **데이터 & 모델 계층**: LightGBM 저장 모델 추론, SHAP TreeExplainer, SQLite/GCS 영속 저장소.
+- **Presentation Layer**: HTML5 / Vanilla CSS / Modern JS 기반 고반응성 경량 웹 인터페이스.
+- **Application Layer**: FastAPI 비동기 REST 라우팅 및 세션 쿠키 기반 브라우저 데이터셋 격리.
+- **AI Agent Layer**: Gemini 3.8 Flash의 Function Calling을 활용한 최대 6회 반복 Tool 호출 루프.
+- **Engine & Storage Layer**: 저장된 Enhanced LightGBM 모델 추론, SHAP TreeExplainer, SQLite/GCS 영속 저장소.
 
 ---
 
-### 2. 데이터 파이프라인 워크플로우 (Data Pipeline)
-데이터 업로드부터 검증, 전처리, 추론, DB 보관에 이르는 전 과정입니다.
+### 4.2 데이터 파이프라인 워크플로우 (Data Workflow v3.0)
+데이터 유입부터 스키마 검증, 추론, XAI 연산 및 DB 저장 파이프라인입니다.
 
 ![데이터 워크플로우](docs/assets/data_workflow_v3.png)
 
-1. **입력 검증 (`validation.py`)**: 590개 센서 포맷, 모델 필수 232개 피처 유무, 비수치/무한대 값, 중복 헤더 검증.
-2. **저장된 전처리 변환 (`inference.py`)**: 학습 시 저장된 중앙값 대치(Imputer) 적용 (재학습 엄격 금지).
-3. **추론 및 XAI**: LightGBM 불량 확률 예측 및 TreeExplainer 기반 SHAP Value 계산.
-4. **영속 저장 (`repository.py`)**: 원본 센서값과 예측 결과를 불변 고유 식별자(`row_id`)로 결합하여 SQLite/GCS에 단일 트랜잭션으로 저장.
-
 ---
 
-## 🛠️ 12종 Python 데이터 분석 도구 (Analysis Tools)
+## 🛠️ 5. 12종 Python 데이터 분석 도구 (Analysis Tools)
 
-Gemini 에이전트는 환각 없이 아래 12개 등록 도구를 호출하여 수치적 근거를 산출합니다. 사용자는 UI에서 도구를 직접 수동 실행할 수도 있습니다.
+Gemini 에이전트는 환각 없이 아래 12개 등록 도구를 호출하여 수치적 근거를 산출합니다.
 
 | 도구명 (Tool) | 분석 내용 및 역할 | 주요 파라미터 / 입력 조건 |
 |---|---|---|
@@ -120,16 +268,16 @@ Gemini 에이전트는 환각 없이 아래 12개 등록 도구를 호출하여 
 
 ---
 
-## 🚀 빠른 시작 (Quick Start)
+## 🚀 6. 빠른 시작 (Quick Start)
 
-### 1. 사전 요구사항
+### 6.1 환경 요구사항
 - **Python 3.11** (scikit-learn 1.7.2 의존성 고정)
 - Windows / macOS / Linux 지원
 
-### 2. 설치 및 실행
+### 6.2 로컬 설치 및 서버 실행
 
 ```bash
-# 1. 저장소 클론 및 이동
+# 1. 저장소 이동
 cd SEMI-GUARD_updated_20261020
 
 # 2. 가상환경 생성 및 활성화
@@ -141,61 +289,50 @@ source .venv/bin/activate
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 
-# 3. 의존성 패키지 설치
+# 3. 필수 의존성 설치
 pip install -r requirements.txt
 
-# 4. 서버 실행
+# 4. FastAPI 서버 기동
 uvicorn server.app:app --host 127.0.0.1 --port 8080
 ```
 
 > [!TIP]
-> **macOS 사용자 안내**: LightGBM 실행 시 `libomp.dylib` 오류가 발생하면 Homebrew로 OpenMP를 설치하세요:
+> **macOS 사용자 안내**: LightGBM 실행 시 `libomp.dylib` 오류가 발생하면 Homebrew로 설치하세요:
 > `brew install libomp`
 
 ---
 
-### 3. Gemini AI 에이전트 활성화 (선택)
-기본 분석, SHAP, 드리프트 분석, 표본 진단은 **API 키 없이도 100% 동작**합니다.
-자연어 질의응답 기능을 활성화하려면 환경변수에 Gemini API 키를 등록합니다.
+### 6.3 Gemini AI 에이전트 활성화 (선택)
+기본 분석, SHAP, 드리프트, 표본 진단은 **API 키 없이 100% 동작**합니다.  
+자연어 질의 기능을 사용하려면 환경변수에 Gemini API 키를 설정합니다.
 
 ```bash
-# Gemini API Key 설정
+# Linux / macOS
 export GEMINI_API_KEY="your-gemini-api-key"
-export GEMINI_MODEL="gemini-3.8-flash"  # 기본값
+export GEMINI_MODEL="gemini-3.8-flash"
 
-# Windows PowerShell의 경우:
+# Windows PowerShell
 $env:GEMINI_API_KEY="your-gemini-api-key"
 $env:GEMINI_MODEL="gemini-3.8-flash"
 
-# 서버 재시작
 uvicorn server.app:app --host 127.0.0.1 --port 8080
 ```
 
 ---
 
-### 4. 접속 주소
-- 🧪 **CSV 분석실 (EDA Lab)**: [`http://127.0.0.1:8080/`](http://127.0.0.1:8080/)
-- 🎛️ **공정 관제 대시보드 (Control Center)**: [`http://127.0.0.1:8080/dashboard/`](http://127.0.0.1:8080/dashboard/)
-- 📑 **기획안 및 변경 이력 v1.1**: [`http://127.0.0.1:8080/proposal/v1.1`](http://127.0.0.1:8080/proposal/v1.1)
-
----
-
-### 5. Docker로 실행하기
+### 6.4 Docker 컨테이너 실행
 
 ```bash
-# 이미지 빌드
 docker build -t semiguard:v3 .
-
-# 로컬 SQLite 데이터 영속성을 유지하며 컨테이너 실행
 mkdir -p runtime
 docker run --rm -p 8080:8080 -v "$PWD/runtime:/app/runtime" semiguard:v3
 ```
 
 ---
 
-## 🧪 시뮬레이션 데이터셋 & 실측 검증 현황
+## 🧪 7. 4대 시뮬레이션 배치(1,400행) 실측 검증 현황
 
-본 프로젝트는 4개 시뮬레이션 배치 CSV(총 1,400행)를 통해 전수 검증을 완료했습니다.
+본 시스템은 4개 시뮬레이션 검증 배치 CSV(총 1,400행)에 대한 전수 추론을 완료했습니다.
 
 | 배치 파일명 | 기간 | 행 수 | 결측 셀 수 | 실제 불량률 | 상위 20% 검토 Recall |
 |---|:---:|:---:|:---:|:---:|:---:|
@@ -204,37 +341,19 @@ docker run --rm -p 8080:8080 -v "$PWD/runtime:/app/runtime" semiguard:v3
 | `sim_batch_300_200906_200908.csv` | 2009.06 ~ 2009.08 | 300행 | 8,064개 | 7.33% (22건) | **22.73%** |
 | `sim_batch_400_200909_200912.csv` | 2009.09 ~ 2009.12 | 400행 | 10,367개 | 3.00% (12건) | **16.67%** |
 
-> [!NOTE]
-> - 시뮬레이션 배치는 통계적 특성을 반영한 합성 검증 데이터셋이며, 실제 공장 운영 성능과 구분하여 평가합니다.
-> - 특히 여름 배치(`sim_batch_300`)의 2009-08 기간(101건 중 14건 불량, 불량률 13.86%)에 대해 Gemini 3.8 Flash가 Tool 호출을 통해 정확한 수치를 도출함을 실증했습니다.
+- **단일 웨이퍼 정밀 분석 CLI**:
+  ```bash
+  python tools/analyze_wafer.py --sample-id 2184 --include-drift --include-global-shap --output artifacts/analysis_reports/detail_2184.json
+  ```
+- **자동화 단위/통합 테스트 (48개 PASS)**:
+  ```bash
+  pip install -r requirements-dev.txt
+  python -m pytest -q tests
+  ```
 
 ---
 
-## 🔬 CLI 분석 도구 및 자동 테스트
-
-### 1. 단일 웨이퍼 CLI 정밀 분석
-특정 웨이퍼 표본(예: ID 2184)의 Top 센서 이탈, SHAP 기여도, 드리프트 통계를 즉시 터미널 및 JSON으로 추출할 수 있습니다.
-
-```bash
-python tools/analyze_wafer.py --sample-id 2184 --include-drift --include-global-shap --output artifacts/analysis_reports/detail_2184.json
-```
-
-### 2. 시뮬레이션 배치 일괄 분석
-```bash
-python tools/analyze_simulation.py
-```
-
-### 3. Pytest 자동 검증 (48개 테스트 통과)
-원본-예측 행 결합, 입력 스키마 검증, 미라벨 처리, SHAP 가산성, 세션 격리, Gemini Tool 호출 루프 등을 전수 검증합니다.
-
-```bash
-pip install -r requirements-dev.txt
-python -m pytest -q tests
-```
-
----
-
-## 🔌 REST API 엔드포인트 명세
+## 🔌 8. REST API 엔드포인트 명세
 
 | Method | Endpoint | 설명 |
 |---|---|---|
@@ -252,44 +371,36 @@ python -m pytest -q tests
 
 ---
 
-## 📂 프로젝트 디렉터리 구조
+## 📂 9. 프로젝트 디렉터리 구조
 
 ```text
 SEMI-GUARD_updated_20261020/
 ├── artifacts/             # 저장된 LightGBM 모델, 전처리 파이프라인, 분석 보고서
 ├── data/raw/              # SECOM 원본 학습 데이터 (secom.data, secom_labels.data)
-├── docs/                  # 기획서, PRD, 워크플로우 이미지, 데모 스크린샷
-│   ├── assets/            # 아키텍처 및 워크플로우 다이어그램 (service/data_workflow_v3.png)
-│   └── demo/              # 실제 동작 스크린샷 및 시연 기록 JSON
-├── picture/               # 통계 시각화 차트 및 EDA 분석 그래프
+├── docs/                  # 기획서, PRD, 워크플로우 다이어그램, 최신 스크린샷
+│   ├── assets/            # 아키텍처 및 워크플로우 이미지 (service/data_workflow_v3.png)
+│   └── demo/              # 최신 고해상도 실시간 서비스 캡처 (01~05_live_*.png)
+├── picture/               # EDA 통계 차트, 왜도 비교, SHAP 중요도, 센서 드리프트 그래프
 ├── runtime/               # 로컬 세션 SQLite 데이터베이스 보관 디렉터리
 ├── server/
 │   └── app.py             # FastAPI 메인 웹 서버 & REST API 라우터
 ├── simulation/            # 4개 시뮬레이션 배치 검증 CSV (1,400행)
-├── src/data_analysis/     # 핵심 분석 엔진
-│   ├── validation.py      # CSV 입력 스펙 및 무결성 검증
-│   ├── inference.py       # 저장 모델 로드 및 추론 (재학습 방지)
-│   ├── repository.py      # SQLite / GCS 데이터 영속성 관리
-│   ├── tools.py           # 12종 데이터 분석 통계/XAI Tool 구현체
-│   ├── agent.py           # Gemini 3.8 Flash Function Calling 에이전트
-│   └── service.py         # 분석 파이프라인 총괄 서비스
-├── tests/                 # 단위 및 통합 테스트 (48개 자동 검증)
+├── src/data_analysis/     # 핵심 분석 엔진 (validation, inference, repository, tools, agent, service)
+├── tests/                 # 단위 및 통합 테스트 (48개 자동 검증 100% 통과)
 ├── tools/                 # 배치 분석 및 웨이퍼 상세 분석 CLI 스크립트
-├── web/                   # 분석 UI 및 공정 관제 대시보드 정적 에셋
-│   ├── index.html         # CSV 분석실 메인 화면
-│   ├── dashboard/         # 통합 공정 관제 서브페이지
-│   └── sample_secom_590.csv # 590개 센서 규격 테스트용 샘플 CSV
-├── Dockerfile             # 컨테이너 빌드 설정
+├── web/                   # 분석 UI 및 공정 관제 대시보드 정적 에셋 (index.html, style.css, app.js)
+├── Dockerfile             # 컨테이너 빌드 명세
 ├── requirements.txt       # 의존성 패키지 명세
 └── README.md              # 프로젝트 안내 문서 (본 문서)
 ```
 
 ---
 
-## 📚 관련 문서 및 참고 자료
+## 📚 10. 관련 문서 및 참고 자료
 
+- 🌐 [SEMI-GUARD 실시간 배포 웹 서비스](https://semiguard-app-ahftuulaqq-uc.a.run.app/)
 - 📄 [서비스 상세 기획서 (최종)](docs/SEMI_GUARD_반도체_공정_AI_통합관제_최종_기획서.md)
-- 📊 [시뮬레이션 배치 분석 결과서](artifacts/analysis_reports/README.md)
-- 📝 [발표 대본 및 진행 가이드](docs/SEMI_GUARD_발표_대본_및_진행가이드.md)
+- 📊 [SECOM 반도체 공정 불량검출 모델링 선정과정 리포트](docs/SECOM_반도체_공정_불량검출_모델링_선정과정_리포트.html)
+- 📝 [SEMI-GUARD 최종 발표자료 슬라이드](docs/SEMI_GUARD_발표자료_슬라이드.html)
+- 🎤 [SEMI-GUARD 발표 대본 및 진행 가이드](docs/SEMI_GUARD_발표_대본_및_진행가이드.md)
 - 🔍 [상세 분석 계산 기준 및 소스 대조 기록](docs/detail_analysis_changes.md)
-- 🎛️ [공정 관제 화면 검토 기록](docs/dashboard_reference_review.md)
