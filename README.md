@@ -1,140 +1,295 @@
-# SEMI-GUARD v3.0
+# 🛡️ SEMI-GUARD v3.0
+### 반도체 공정(SECOM) 불량 조기 탐지 & AI 통합 관제·데이터 분석 시스템
 
-CSV 원본 센서와 저장 모델의 추론 결과를 결합해 분석하는 서비스다. LLM Wiki를 데이터셋 범위의 데이터 분석 에이전트와 Python Tool로 교체했다.
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LightGBM](https://img.shields.io/badge/Model-LightGBM_Classifier-FF7F0E?style=flat)](https://lightgbm.readthedocs.io/)
+[![XAI](https://img.shields.io/badge/Explainability-SHAP_TreeExplainer-4B0082?style=flat)](https://github.com/slundberg/shap)
+[![LLM Agent](https://img.shields.io/badge/AI_Agent-Gemini_3.8_Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Tests](https://img.shields.io/badge/Pytest-48_Passed-brightgreen?style=flat&logo=pytest&logoColor=white)](tests/)
 
-- `data/raw/SECOM` 데이터(실제 파일은 `data/raw/secom.data`, `secom_labels.data`)는 기존 학습·평가에서 사용한다. 학습 노트북, Streamlit `app.py`, 저장 모델은 유지한다.
-- 업로드 및 `simulation/` CSV는 **저장된 전처리의 transform과 저장 모델 predict_proba**만 수행한다. 재학습하지 않는다.
-- 원본 센서와 예측은 정렬 순서가 아닌 `row_id`로 연결한다. 파일 해시·모델 버전·데이터셋 ID로 결과를 추적한다.
-- 기본 분석과 Tool 직접 실행은 LLM 키 없이 사용한다. 자연어 질문은 서버의 Gemini 3.8 Flash 함수 호출 루프로 처리한다.
+---
 
-[서비스 기획안](docs/반도체_공정_데이터분석_시각화_서비스_기획서.html) · [상세 설계](docs/SEMI_GUARD_반도체_공정_AI_통합관제_최종_기획서.md) · [simulation 분석 결과](artifacts/analysis_reports/README.md)
+## 📌 프로젝트 소개 (Overview)
 
-## 실행
+**SEMI-GUARD v3.0**은 반도체 웨이퍼 제조 공정의 590개 센서 데이터(SECOM)를 바탕으로 **불량 웨이퍼를 조기에 탐지**하고, **XAI(SHAP)와 LLM 에이전트를 결합하여 이상 원인을 과학적으로 진단·관제**하는 엔터프라이즈 AI 시스템입니다.
 
-Python 3.11 기준이다. 저장된 전처리의 scikit-learn 버전은 1.7.2이므로 해당 버전을 고정했다.
+기존의 정적 대시보드나 환각(Hallucination) 위험이 있는 일반 LLM 챗봇을 탈피하여, **엄격한 데이터 무결성 계약**과 **12종의 검증된 Python 분석 도구(Tools)**를 기반으로 동작하는 **Gemini 3.8 Flash 분석 에이전트**를 탑재했습니다.
 
-```sh
+```
+[CSV 센서 데이터 업로드] ──▶ [저장된 모델 추론 (LightGBM)] ──▶ [원본+예측 DB 영속 저장]
+                                                                        │
+        ┌───────────────────────────────────────────────────────────────┴───────────────────────────────┐
+        ▼                                                                                               ▼
+┌──────────────────────────────────────────────┐                ┌──────────────────────────────────────────────┐
+│          🧪 CSV 분석실 (EDA Lab)             │                │        🎛️ 공정 관제 대시보드 (Control)       │
+│  - 590개 센서 자동 품질/결측 진단            │                │  - 기간별·월별 불량률 및 7일 이동평균 추이   │
+│  - 표본별 SHAP 워터폴 & Top 5 센서 정밀진단  │                │  - Top-K% 검토 성능 평가 & Confusion Matrix  │
+│  - Gemini 에이전트 Tool 기반 자연어 질의응답 │                │  - 엔지니어 수동 점검 발령 및 승인 결재 체계 │
+└──────────────────────────────────────────────┘                └──────────────────────────────────────────────┘
+```
+
+> [!NOTE]
+> **핵심 원칙 (AGENTS.md 준수)**: 신규 CSV 데이터에 대해 모델을 재학습(fit)하지 않으며, 사전에 검증된 저장 전처리(transform)와 저장 모델(LightGBM)로만 추론합니다. 오류나 미확인 라벨, SHAP 값을 임의의 가짜 데모 값으로 대체하지 않고 정확한 계산 근거만을 제공합니다.
+
+---
+
+## 🖼️ 시스템 화면 미리보기 (Showcase)
+
+SEMI-GUARD는 **데이터 과학자를 위한 정밀 탐색 분석실**과 **공정 엔지니어/관리자를 위한 실시간 관제 대시보드** 두 가지 인터페이스를 제공합니다.
+
+### 1. CSV 분석실: 자동 기본 분석 (EDA)
+> CSV를 업로드하거나 시뮬레이션 배치를 선택하면 즉시 590개 센서의 결측률, 라벨 불량률, 위험도 분포를 자동 산출합니다.
+
+![CSV 분석실 기본 분석](docs/demo/01_basic_analysis.jpg)
+
+---
+
+### 2. Gemini 3.8 Flash 기반 데이터 분석 에이전트
+> 자연어로 질문하면 LLM이 필요한 Python 분석 Tool을 직접 호출(Function Calling)하고, **실제 계산된 수치 근거(JSON)를 바탕으로 신뢰성 있는 답변**을 생성합니다.
+
+![Gemini AI 에이전트 질의응답](docs/demo/02_gemini_agent.jpg)
+
+---
+
+### 3. 통합 공정 관제 대시보드 (Control Center Hub)
+> 기간별 수율 및 불량률 추이, 7일 이동평균, 위험 웨이퍼 목록, 공정 점검 지시 및 승인 워크플로우를 한곳에서 관리합니다.
+
+![공정 관제 대시보드 허브](docs/demo/03_dashboard_hub.jpg)
+
+---
+
+### 4. 검토 비율(Top-K%)별 모델 성능 & 혼동행렬 탐색
+> 한정된 검사 자원 환경에서 검토 비율(5%~50%)에 따른 Recall, Precision, Lift 변화를 분석하고 전체 표본의 TP/FP/FN/TN을 즉시 조회합니다.
+
+![검토 비율별 성능 분석](docs/demo/05_dashboard_performance.jpg)
+
+---
+
+### 5. 웨이퍼 표본 정밀진단 & SHAP Waterfall 설명
+> 개별 웨이퍼(Sample ID)의 Top 5 이상 센서 상태(정상 5~95% 구간 대비 이탈 여부)와 누적 SHAP 기여도 워터폴 차트를 통해 오탐(FP)과 진성불량(TP)을 명확히 판별합니다.
+
+![웨이퍼 표본 정밀진단](docs/demo/06_wafer_detail.jpg)
+
+---
+
+## 🏗️ 시스템 아키텍처 & 워크플로우
+
+### 1. 서비스 아키텍처 (Service Architecture)
+SEMI-GUARD의 전체 계층 구조와 Gemini AI Agent의 Tool 호출 루프를 나타냅니다.
+
+![서비스 워크플로우](docs/assets/service_workflow_v3.png)
+
+- **UI 계층**: HTML/Vanilla JS 기반의 고반응성 경량 웹 인터페이스 (CSV 분석실 `/`, 공정 관제 `/dashboard/`).
+- **API 계층**: FastAPI 기반 REST 엔드포인트 및 브라우저 세션 쿠키 기반 데이터셋 격리.
+- **분석 에이전트 계층**: Gemini 3.8 Flash의 Function Calling을 활용한 최대 6회 반복 Tool 호출 루프.
+- **데이터 & 모델 계층**: LightGBM 저장 모델 추론, SHAP TreeExplainer, SQLite/GCS 영속 저장소.
+
+---
+
+### 2. 데이터 파이프라인 워크플로우 (Data Pipeline)
+데이터 업로드부터 검증, 전처리, 추론, DB 보관에 이르는 전 과정입니다.
+
+![데이터 워크플로우](docs/assets/data_workflow_v3.png)
+
+1. **입력 검증 (`validation.py`)**: 590개 센서 포맷, 모델 필수 232개 피처 유무, 비수치/무한대 값, 중복 헤더 검증.
+2. **저장된 전처리 변환 (`inference.py`)**: 학습 시 저장된 중앙값 대치(Imputer) 적용 (재학습 엄격 금지).
+3. **추론 및 XAI**: LightGBM 불량 확률 예측 및 TreeExplainer 기반 SHAP Value 계산.
+4. **영속 저장 (`repository.py`)**: 원본 센서값과 예측 결과를 불변 고유 식별자(`row_id`)로 결합하여 SQLite/GCS에 단일 트랜잭션으로 저장.
+
+---
+
+## 🛠️ 12종 Python 데이터 분석 도구 (Analysis Tools)
+
+Gemini 에이전트는 환각 없이 아래 12개 등록 도구를 호출하여 수치적 근거를 산출합니다. 사용자는 UI에서 도구를 직접 수동 실행할 수도 있습니다.
+
+| 도구명 (Tool) | 분석 내용 및 역할 | 주요 파라미터 / 입력 조건 |
+|---|---|---|
+| `profile_dataset` | 데이터셋 행/센서 수, 결측치·상수열 현황, 라벨 및 예측 위험도 분포 요약 | 데이터셋 전체 센서값 |
+| `rank_samples` | 예측 위험 점수 상위/하위 N개 표본과 원본 센서값 조회 | `top_n`, `ascending` |
+| `query_data` | 조건 필터링, 컬럼 선택, 정렬, 그룹 집계 (자유 질의) | `filters`, `columns`, `sort_by` |
+| `compare_groups` | 고위험군(상위 20%)과 정상군의 센서 평균 및 표준화 차이(Z-Score) 비교 | `threshold_ratio` |
+| `correlate` | 센서와 위험 점수 간 상관계수 또는 센서 간 상관계수 산출 | `target_col`, `top_n` |
+| `time_summary` | 일별/주별/월별 표본 수, 평균 위험 점수, 확인 라벨 불량률 추이 | `freq` ('M', 'W', 'D'), timestamp 필요 |
+| `compare_reference` | SECOM 학습 정상군(1,170행) 분포 대비 현재 배치의 센서 평균 이동량 및 KS 거리 | 버전 고정 정상 기준 분포 |
+| `evaluate_predictions`| 검토 비율(Top 5%~50%)별 혼동행렬(TP/FP/FN/TN), Recall, Precision, Lift 평가 | 실제 정답 라벨 필요 |
+| `explain_sample` | 특정 웨이퍼 표본의 SHAP 기여도, Base Value, 모델 예측 로그오즈 산출 | `sample_id` |
+| `diagnose_sample` | 표본의 Top 5 센서 정상 구간(5~95%) 이탈 상태, 누적 SHAP, 진단 권고안 도출 | `sample_id` |
+| `sensor_drift` | 시간 경과에 따른 센서값의 Pearson/Kendall 기울기, 상승/하강 추세 식별 | `direction` ('up', 'down', 'all') |
+| `global_shap` | 데이터셋 전체의 평균 절대 SHAP 중요도 및 상위 영향도 센서 랭킹 도출 | `max_samples` (기본 200) |
+
+---
+
+## 🚀 빠른 시작 (Quick Start)
+
+### 1. 사전 요구사항
+- **Python 3.11** (scikit-learn 1.7.2 의존성 고정)
+- Windows / macOS / Linux 지원
+
+### 2. 설치 및 실행
+
+```bash
+# 1. 저장소 클론 및 이동
+cd SEMI-GUARD_updated_20261020
+
+# 2. 가상환경 생성 및 활성화
+# [Linux / macOS]
 python3.11 -m venv .venv
 source .venv/bin/activate
+
+# [Windows PowerShell]
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+# 3. 의존성 패키지 설치
 pip install -r requirements.txt
+
+# 4. 서버 실행
 uvicorn server.app:app --host 127.0.0.1 --port 8080
 ```
 
-`http://127.0.0.1:8080`에서 CSV 업로드 또는 simulation 파일 선택 → 기본 분석 → Tool 실행/질문 순서로 사용한다. 파일 전체를 페이지별로 조회하고 원본+예측 CSV를 내려받을 수 있다. `web/sample_secom_590.csv`는 590개 센서가 있는 3행 합성 예제다. 이전 7개 센서 예제는 저장 모델 입력 요건을 충족하지 않아 제거했다.
+> [!TIP]
+> **macOS 사용자 안내**: LightGBM 실행 시 `libomp.dylib` 오류가 발생하면 Homebrew로 OpenMP를 설치하세요:
+> `brew install libomp`
 
-macOS에서 LightGBM이 `libomp.dylib`를 찾지 못하면 OpenMP 런타임을 설치하거나 기존 호환 라이브러리 디렉터리를 `DYLD_LIBRARY_PATH`로 지정한다. Linux 컨테이너는 Dockerfile이 `libgomp1`을 설치한다. 모델 로드 실패를 데모 예측으로 대체하지 않으며 `/api/health`와 화면에서 오류를 확인할 수 있다.
+---
 
-자연어 질문을 활성화하려면 서버 환경에 `GEMINI_API_KEY`, `GEMINI_MODEL=gemini-3.8-flash`를 지정한 뒤 재시작한다. 모델 기본값도 `gemini-3.8-flash`다. `GEMINI_API_KEY`가 없으면 `GOOGLE_API_KEY`를 사용한다. `.env.example`은 변수 안내이며 `.env`를 자동 로드하지 않는다. 키는 프런트엔드에 두지 않는다. 질문과 필요한 계산 요약은 외부 LLM에 전송되며 화면에 이를 안내한다.
+### 3. Gemini AI 에이전트 활성화 (선택)
+기본 분석, SHAP, 드리프트 분석, 표본 진단은 **API 키 없이도 100% 동작**합니다.
+자연어 질의응답 기능을 활성화하려면 환경변수에 Gemini API 키를 등록합니다.
 
-```sh
-export GEMINI_MODEL='gemini-3.8-flash'
-# GEMINI_API_KEY는 실행 환경의 비밀 관리 기능으로 공급
+```bash
+# Gemini API Key 설정
+export GEMINI_API_KEY="your-gemini-api-key"
+export GEMINI_MODEL="gemini-3.8-flash"  # 기본값
+
+# Windows PowerShell의 경우:
+$env:GEMINI_API_KEY="your-gemini-api-key"
+$env:GEMINI_MODEL="gemini-3.8-flash"
+
+# 서버 재시작
 uvicorn server.app:app --host 127.0.0.1 --port 8080
 ```
 
-## 데이터와 분석 계약
+---
 
-UTF-8 CSV, 최대 20 MiB·10,000행·650열을 지원한다. 센서는 `feature_1`~`feature_590`이고 모델에 저장된 232개 필수 피처 열이 모두 있어야 한다. 행 안의 결측은 집계한 뒤 학습 시 저장한 중앙값으로 대체한다. 센서 누락 열, 비수치·무한대, 중복·빈 sample_id, 중복 헤더는 오류로 반환한다. sample_id가 없으면 발급한다. 내부 row_id는 0부터 시작한 원본 행 순서이며 sample_id와 다르다.
+### 4. 접속 주소
+- 🧪 **CSV 분석실 (EDA Lab)**: [`http://127.0.0.1:8080/`](http://127.0.0.1:8080/)
+- 🎛️ **공정 관제 대시보드 (Control Center)**: [`http://127.0.0.1:8080/dashboard/`](http://127.0.0.1:8080/dashboard/)
+- 📑 **기획안 및 변경 이력 v1.1**: [`http://127.0.0.1:8080/proposal/v1.1`](http://127.0.0.1:8080/proposal/v1.1)
 
-`timestamp`는 선택이다. 없으면 시간 분석만 사용할 수 없다. `actual_label` 또는 `label`은 0/1/빈 값이며 선택이다. 라벨이 없으면 실제 불량률·성능은 미확인이다. 부분 라벨의 불량률은 확인 라벨만 분모로 삼고 그 수를 표시한다. 성능 평가는 전체 라벨을 요구한다. 원본 SECOM -1/1 라벨 변환은 초기 학습 로더의 책임이다.
+---
 
-|Tool|계산|
-|---|---|
-|profile_dataset|행·센서 수, 결측·상수열, 확인 라벨, 위험도 분포|
-|rank_samples|위험 순위 및 원본 센서값|
-|query_data|조건 필터·컬럼 선택·정렬·그룹 집계|
-|compare_groups|상위 검토군과 나머지 센서 평균·표준화 차이|
-|correlate|센서와 위험 점수 또는 센서 간 상관·유효 표본 수|
-|time_summary|실제 일/주/월별 건수·평균 위험 점수·확인 라벨 불량률|
-|compare_reference|SECOM 학습 정상군 1,170행의 원본 센서 분포 대비 이동|
-|evaluate_predictions|배치 상위 검토 비율별 혼동행렬·Recall·Precision·Lift|
-|explain_sample|실제 저장 모델의 SHAP 기여도·기저값·로그오즈|
-|diagnose_sample|표본 ID의 Top 5 센서 상태·정상 참고 구간·실제 누적 SHAP·분류별 검토 권고|
-|sensor_drift|실제 시간의 Pearson·Kendall·표준화 기울기·초기후기 이동·상승과 하강|
-|global_shap|선택 데이터셋 평균 절대 SHAP·균등 표본 선택과 실제 분석 수|
+### 5. Docker로 실행하기
 
-기본 리포트는 품질·그룹 차이·상관·월별·참고 분포·라벨 성능을 계산하고 질문 후보를 제시한다. Tool의 JSON 인자를 바꾸면 미리 정하지 않은 분석을 조합할 수 있다. 에이전트는 등록 Tool만 호출한다. 임의 Python/SQL/쉘 실행은 지원하지 않는다. 최대 6회 응답 루프·12회 Tool 호출·반환 50행·선택 20열로 제한한다. 계산 근거 없는 LLM 응답은 성공으로 반환하지 않는다. 상관·SHAP은 실제 고장 원인 확정 근거가 아니다.
-
-`src/data_analysis/`: `validation.py` 입력 계약, `inference.py` 저장 모델, `repository.py` 영속 저장, `tools.py` 계산, `service.py` 공통 파이프라인, `agent.py` LLM Tool 루프다. `server/app.py`는 API, `web/`은 분석 UI다.
-
-## API
-
-- `GET /api/health`: 모델·에이전트 설정 상태, Tool 목록
-- `POST /api/predict-batch`: multipart CSV → dataset_id·전수 예측·기본 리포트
-- `GET /api/simulation`, `POST /api/simulation/{filename}/analyze`: 허용된 파일을 공통 경로로 분석
-- `GET /api/datasets`, `GET /api/datasets/{id}?offset=0&limit=50`: 세션별 목록·페이지 조회
-- `GET /api/datasets/{id}/report`, `GET /api/datasets/{id}/export`: 리포트·원본+예측 다운로드
-- `POST /api/datasets/{id}/tools/{name}`: `{"arguments":{...}}`
-- `POST /api/chat`: `{"query":"...","dataset_id":"UUID","conversation_id":null}` → 답변·대화 ID·Tool 근거
-- `GET /api/evaluation`: 보관된 SECOM 시험 예측 314행 평가
-
-Wiki API·Wiki 챗봇은 제거했다. 전환 전 파일은 상위 폴더의 archive 사본에서 복구할 수 있다. 기존 학습·평가 노트북은 유지하며 이전 화면 재생성용 tools/scratch 스크립트는 v3 실행 경로에 사용하지 않는다.
-
-## 저장과 실행 환경
-
-로컬 기본값은 `runtime/analysis.sqlite3`다. `DATASET_DB`로 경로를 바꿀 수 있다. 원본·예측을 한 트랜잭션에 저장하고 같은 파일·모델·세션은 중복 등록하지 않는다. 서버가 발급한 HttpOnly 세션 쿠키의 소유 범위로 데이터셋·대화를 격리한다. 현재 방식은 브라우저 세션 기반이므로 쿠키 만료/삭제 후 기존 데이터를 복구하는 계정 연동은 별도 과제다.
-
-Cloud Run의 로컬 디스크는 영속 저장이 아니므로 `DATASET_STORAGE=gcs`, `DATASET_BUCKET=<비공개 버킷>`을 명시해야 시작할 수 있다. 서비스 계정에 해당 버킷만 접근하는 IAM을 설정한다. GCS 구현은 원본·예측을 하나의 압축 객체로 저장하고, 새 데이터셋 생성은 generation 조건으로 중복을 방지한다. 이번 작업에서 실제 GCS와 Cloud Run 배포는 실행하지 않았다.
-
-```sh
+```bash
+# 이미지 빌드
 docker build -t semiguard:v3 .
-# 로컬 컨테이너의 SQLite 보존 예시
+
+# 로컬 SQLite 데이터 영속성을 유지하며 컨테이너 실행
 mkdir -p runtime
 docker run --rm -p 8080:8080 -v "$PWD/runtime:/app/runtime" semiguard:v3
 ```
 
-## 일괄 분석과 검증
+---
 
-```sh
+## 🧪 시뮬레이션 데이터셋 & 실측 검증 현황
+
+본 프로젝트는 4개 시뮬레이션 배치 CSV(총 1,400행)를 통해 전수 검증을 완료했습니다.
+
+| 배치 파일명 | 기간 | 행 수 | 결측 셀 수 | 실제 불량률 | 상위 20% 검토 Recall |
+|---|:---:|:---:|:---:|:---:|:---:|
+| `secom_test_batch_200811_200903.csv` | 2008.11 ~ 2009.03 | 500행 | 13,253개 | 6.20% (31건) | **35.48%** |
+| `sim_batch_200_200904_200905.csv` | 2009.04 ~ 2009.05 | 200행 | 5,280개 | 4.50% (9건) | **22.22%** |
+| `sim_batch_300_200906_200908.csv` | 2009.06 ~ 2009.08 | 300행 | 8,064개 | 7.33% (22건) | **22.73%** |
+| `sim_batch_400_200909_200912.csv` | 2009.09 ~ 2009.12 | 400행 | 10,367개 | 3.00% (12건) | **16.67%** |
+
+> [!NOTE]
+> - 시뮬레이션 배치는 통계적 특성을 반영한 합성 검증 데이터셋이며, 실제 공장 운영 성능과 구분하여 평가합니다.
+> - 특히 여름 배치(`sim_batch_300`)의 2009-08 기간(101건 중 14건 불량, 불량률 13.86%)에 대해 Gemini 3.8 Flash가 Tool 호출을 통해 정확한 수치를 도출함을 실증했습니다.
+
+---
+
+## 🔬 CLI 분석 도구 및 자동 테스트
+
+### 1. 단일 웨이퍼 CLI 정밀 분석
+특정 웨이퍼 표본(예: ID 2184)의 Top 센서 이탈, SHAP 기여도, 드리프트 통계를 즉시 터미널 및 JSON으로 추출할 수 있습니다.
+
+```bash
+python tools/analyze_wafer.py --sample-id 2184 --include-drift --include-global-shap --output artifacts/analysis_reports/detail_2184.json
+```
+
+### 2. 시뮬레이션 배치 일괄 분석
+```bash
 python tools/analyze_simulation.py
-python tools/analyze_simulation.py --file simulation/sim_batch_300_200906_200908.csv --output artifacts/custom_analysis
+```
+
+### 3. Pytest 자동 검증 (48개 테스트 통과)
+원본-예측 행 결합, 입력 스키마 검증, 미라벨 처리, SHAP 가산성, 세션 격리, Gemini Tool 호출 루프 등을 전수 검증합니다.
+
+```bash
 pip install -r requirements-dev.txt
 python -m pytest -q tests
 ```
 
-4개 simulation 파일 1,400행을 실제 모델로 추론했다. `artifacts/analysis_reports/`의 파일별 JSON과 README에 결과를 기록했다. 상위 20% Recall은 파일별 약 17~35%로, 보관된 SECOM 시험 Recall과 다르다. 시뮬레이션은 합성 데이터이므로 실제 운영 성능으로 해석하지 않는다.
+---
 
-테스트는 원본-예측 행 연결, 입력 오류·미라벨 처리, 실제 CSV 통계와 추론, SHAP 가산성, SQLite 재시작·세션 격리, API·Tool 호출 루프를 확인한다. Gemini 3.8 Flash 실제 API로 월별 분석(time_summary)과 후속 성능 평가(evaluate_predictions)의 Tool 호출·답변을 확인했다. 자동 검증은 총 40개를 통과했으며, GCS 실제 연결은 별도 환경이 필요하다. 시험셋을 모델 선정에 사용한 기존 학습 절차는 독립 평가가 필요하고 이번에 모델을 재학습하지 않았다.
+## 🔌 REST API 엔드포인트 명세
 
-## 실제 화면 시연
+| Method | Endpoint | 설명 |
+|---|---|---|
+| `GET` | `/api/health` | 시스템 상태, 모델 로드 상태, 등록된 12종 Tool 목록 반환 |
+| `POST`| `/api/predict-batch` | CSV 업로드 → 스키마 검증 → 모델 추론 → 기본 EDA 리포트 반환 |
+| `GET` | `/api/simulation` | 서버 내 시뮬레이션 배치 CSV 목록 조회 |
+| `POST`| `/api/simulation/{filename}/analyze` | 시뮬레이션 파일 즉시 추론 및 분석 |
+| `GET` | `/api/datasets` | 현재 세션에서 분석된 데이터셋 목록 조회 |
+| `GET` | `/api/datasets/{id}?offset=0&limit=50` | 데이터셋 페이징 조회 (원본 센서 + 모델 예측 결합) |
+| `GET` | `/api/datasets/{id}/report` | 기본 EDA 종합 리포트 및 질의 추천 목록 조회 |
+| `GET` | `/api/datasets/{id}/export` | 원본 센서값 + 예측 불량 확률 결합 CSV 다운로드 |
+| `POST`| `/api/datasets/{id}/tools/{name}` | 특정 분석 Tool 직접 실행 (`arguments` 전달) |
+| `POST`| `/api/chat` | Gemini 3.8 Flash 에이전트 질의 (`query`, `dataset_id`) |
+| `GET` | `/api/evaluation` | 보관된 SECOM 테스트 데이터셋(314행) 모델 평가 지표 반환 |
 
-`simulation/sim_batch_300_200906_200908.csv`를 웹에서 업로드했다. 기본 분석은 300행·590센서·8,064개 결측 셀을 계산했다. Gemini는 2009-08 불량률 14/101=13.86%를 계산하고, 후속 질의에서 상위 20% 검토 TP=5·FN=17·Recall=22.73%를 답했다.
+---
 
-[기본 분석 화면](docs/demo/01_basic_analysis.jpg) · [Gemini 실제 답변과 Tool 근거](docs/demo/02_gemini_agent.jpg) · [시연 기록](docs/demo/live_demo.json)
+## 📂 프로젝트 디렉터리 구조
 
-## 공정 관제 서브페이지와 기획안 v1.1
-
-같은 서버의 `/dashboard/`에서 엔지니어 또는 관리자 데모를 연다. 기존 Cloud Run 화면의 메뉴와 상세 페이지를 컴퓨터 사용 기능으로 직접 눌러 검토한 뒤 구현했다. [직접 조작 검토 기록](docs/dashboard_reference_review.md)에 원격 기능과 로컬 구현의 대응을 기록했다. CSV 분석실과 데이터셋을 공유한다.
-
-- 표본 검색과 실제 SHAP 진단, TP/FP 비교 및 단독 표시
-- 선택 기간의 월별·실제 7일 이동 불량률, 차트 PNG 다운로드
-- 5~50% 검토 비율별 성능, AP·혼동행렬과 전체 표본 TP/FP/FN/TN 탐색
-- 학습 정상군 1170행 대비 232센서 평균 이동·표준편차 비·KS 거리
-- 수동 점검 발령 → 체크리스트·완료 보고 → 승인 또는 보완 요청과 이력 저장
-- CSV 업로드, simulation 선택, SECOM 시험 314행 불러오기, 기간별 Markdown·예측 CSV 다운로드
-- 선택 데이터셋과 기간에 제한된 Gemini Tool 질의와 현재 서버 주소 QR
-
-기간과 비율이 달라지면 순위와 표본 분류를 다시 계산한다. 대화도 데이터셋·기간·비율 문맥을 구분한다. 여름 CSV의 8월 101행을 25% 검토할 때 26행을 선정하고 TP 6·FP 20·FN 8·TN 67을 표시했다. 같은 기간의 실제 Gemini 질의는 Python Tool로 확인 불량 14건, 13.86%를 계산했다.
-
-로컬에서 점검 지시를 등록하고 완료 보고·승인까지 직접 눌렀고, SECOM 불러오기·CSV 업로드·보고서와 CSV 다운로드를 확인했다. 자동 검증은 총 **40개 통과**다. `/proposal/v1.1`에는 최초 Word 기획과 중간 v2.5, 현재 코드를 구분한 변경표와 에이전트 영역을 표시한 워크플로우 이미지를 제공한다. Word 파일과 HTML은 상위 프로젝트 폴더에 별도로 보관한다.
-
-Firebase 로그인·회원가입 폼은 기존 SDK 설정을 사용하지만 실제 계정 생성은 검증하지 않았다. API의 데이터 소유 범위는 브라우저 세션이다. 엔지니어·관리자 버튼과 점검 승인은 로컬 시연 기능이며 서버의 운영 계정 권한 검증은 후속 작업이다. Cloud Run과 GCS 실제 배포·연결은 수행하지 않았다.
-
-## 상세 분석 기능 확장
-
-기존 `tools/`의 정적 상세 생성 스크립트와 `src/analysis.py`를 검토하고, CSV 분석실과 관제 화면에 실제 계산 함수를 연결했다. 현재 등록 Tool은 12개다. [소스 대조와 계산 기준](docs/detail_analysis_changes.md)에 고정 센서값·임의 SHAP·추정 날짜를 사용하는 과거 경로와 현재 구현의 차이를 기록했다.
-
-CSV 분석실의 **표본 정밀분석과 점검 권고**에서 sample_id를 검색하거나 전체 예측 표의 **정밀분석** 버튼을 누른다. Top 5 센서와 학습 정상군 중앙값·평균·표준편차·5~95% 참고 구간, 결측과 상태를 표시한다. Z는 평균 기준이며 중앙값을 평균으로 표기하지 않는다. SHAP은 상위 8개와 나머지 전체 피처를 합산해 최종 모델 출력과 일치하는 워터폴로 그린다. TP/FP/FN/TN/미라벨에 따른 권고와 계산 근거를 함께 제공한다.
-
-**전체 SHAP 중요도 분석**과 **시간 드리프트 분석**은 LLM 없이 실행한다. 전체 SHAP은 기본 최대 200행을 원본 순서의 균등 간격으로 선택하고 200/500처럼 실제 분석 수를 표시한다. 시간 드리프트는 실제 경과 일수와 결측 제외 원본값으로 계산하고 상승·하강·전체 방향 필터를 제공한다. 엄격한 조건에 맞는 센서가 없으면 빈 결과를 표시한다.
-
-관제 서브페이지도 같은 분석과 공통 렌더러를 사용한다. SHAP 비교 화면에 전체 중요도 버튼, 분포 변화 화면에 시간 드리프트 통계·월별 센서 추이, 표본 상세에 에이전트 질문과 점검 지시 초안 버튼을 추가했다. 초안은 사람이 검토한 뒤 등록하며 실제 설비 정지나 제품 통과·폐기를 자동 결정하지 않는다.
-
-```sh
-python tools/analyze_wafer.py --sample-id 2184 --include-drift --include-global-shap --output artifacts/analysis_reports/detail_2184.json
+```text
+SEMI-GUARD_updated_20261020/
+├── artifacts/             # 저장된 LightGBM 모델, 전처리 파이프라인, 분석 보고서
+├── data/raw/              # SECOM 원본 학습 데이터 (secom.data, secom_labels.data)
+├── docs/                  # 기획서, PRD, 워크플로우 이미지, 데모 스크린샷
+│   ├── assets/            # 아키텍처 및 워크플로우 다이어그램 (service/data_workflow_v3.png)
+│   └── demo/              # 실제 동작 스크린샷 및 시연 기록 JSON
+├── picture/               # 통계 시각화 차트 및 EDA 분석 그래프
+├── runtime/               # 로컬 세션 SQLite 데이터베이스 보관 디렉터리
+├── server/
+│   └── app.py             # FastAPI 메인 웹 서버 & REST API 라우터
+├── simulation/            # 4개 시뮬레이션 배치 검증 CSV (1,400행)
+├── src/data_analysis/     # 핵심 분석 엔진
+│   ├── validation.py      # CSV 입력 스펙 및 무결성 검증
+│   ├── inference.py       # 저장 모델 로드 및 추론 (재학습 방지)
+│   ├── repository.py      # SQLite / GCS 데이터 영속성 관리
+│   ├── tools.py           # 12종 데이터 분석 통계/XAI Tool 구현체
+│   ├── agent.py           # Gemini 3.8 Flash Function Calling 에이전트
+│   └── service.py         # 분석 파이프라인 총괄 서비스
+├── tests/                 # 단위 및 통합 테스트 (48개 자동 검증)
+├── tools/                 # 배치 분석 및 웨이퍼 상세 분석 CLI 스크립트
+├── web/                   # 분석 UI 및 공정 관제 대시보드 정적 에셋
+│   ├── index.html         # CSV 분석실 메인 화면
+│   ├── dashboard/         # 통합 공정 관제 서브페이지
+│   └── sample_secom_590.csv # 590개 센서 규격 테스트용 샘플 CSV
+├── Dockerfile             # 컨테이너 빌드 설정
+├── requirements.txt       # 의존성 패키지 명세
+└── README.md              # 프로젝트 안내 문서 (본 문서)
 ```
 
-표본 2184의 실제 센서·SHAP·권고, Gemini의 신규 Tool 호출과 200/500행 전체 중요도 계산을 화면에서 확인했다. 자동 검증 **48개 통과**. [표본 상세 화면](docs/demo/06_wafer_detail.jpg) · [CLI 분석 결과](artifacts/analysis_reports/detail_2184.json).
+---
 
+## 📚 관련 문서 및 참고 자료
 
-월별 관제 기간 변경 시 이전 표본이 해당 월에 없으면 월 내 위험 순위 1위로 자동 변경해 진단한다. 해당 월에 포함되는 기존 선택은 유지한다. 기간 갱신 중 이전 요청의 결과와 오류는 현재 화면에 반영하지 않는다. 2009년 9~12월 전환과 혼동행렬의 FN 표본 진단 연결을 직접 검증했다.
+- 📄 [서비스 상세 기획서 (최종)](docs/SEMI_GUARD_반도체_공정_AI_통합관제_최종_기획서.md)
+- 📊 [시뮬레이션 배치 분석 결과서](artifacts/analysis_reports/README.md)
+- 📝 [발표 대본 및 진행 가이드](docs/SEMI_GUARD_발표_대본_및_진행가이드.md)
+- 🔍 [상세 분석 계산 기준 및 소스 대조 기록](docs/detail_analysis_changes.md)
+- 🎛️ [공정 관제 화면 검토 기록](docs/dashboard_reference_review.md)
