@@ -1,0 +1,1163 @@
+{
+  "metadata": {
+    "dataset_id": "a2508105-73c2-5b80-952e-3cb9652bb590",
+    "filename": "secom_test_batch_200811_200903.csv",
+    "file_sha256": "56afab68cfc8ed2a4bce8b45bc804802a5ecb3aca832d04e6e3e35253b22321d",
+    "model_version": "777d4a5683437110b7ec",
+    "schema_version": "3.0",
+    "created_at": "2026-10-20T03:47:46.784213+00:00",
+    "row_count": 500,
+    "sensor_count": 590,
+    "source_type": "upload",
+    "status": "completed",
+    "original_row_count": 500,
+    "period": "all",
+    "review_ratio": 0.2,
+    "scope_count": 500
+  },
+  "diagnosis": {
+    "sample_id": "2184",
+    "scope_count": 500,
+    "period": "all",
+    "review_ratio": 0.2,
+    "selected_count": 100,
+    "reference_count": 1170,
+    "row": {
+      "row_id": 183,
+      "sample_id": "2184",
+      "risk_score": 0.0175919855286681,
+      "risk_rank": 1,
+      "abnormal_sensor_count": 7,
+      "actual_label": 0,
+      "category": "FP",
+      "selected_for_review": true,
+      "rank_fraction": 0.002
+    },
+    "summary": "현재 500행 중 1위이며 상위 검토 20% 대상입니다. 검토 대상으로 선택됐지만 정답 라벨은 정상입니다. 오탐 배경과 센서 이력을 대조하고 반복 편차가 있는지 확인하세요.",
+    "top_sensors": [
+      {
+        "sensor": "feature_226",
+        "raw_value": 2598.3888,
+        "reference_mean": 1037.2896669902914,
+        "reference_median": 962.2002,
+        "reference_std": 424.71582555939887,
+        "reference_p05": 484.07968,
+        "reference_p95": 1849.7599599999996,
+        "reference_count": 1133,
+        "z_score": 3.675632126383716,
+        "missing": false,
+        "outside_reference": true,
+        "status": "편차 큼"
+      },
+      {
+        "sensor": "feature_563",
+        "raw_value": 286.7562,
+        "reference_mean": 262.83419665271964,
+        "reference_median": 264.272,
+        "reference_std": 7.329047864207341,
+        "reference_p05": 248.733,
+        "reference_p95": 273.1275,
+        "reference_count": 956,
+        "z_score": 3.2639987881792303,
+        "missing": false,
+        "outside_reference": true,
+        "status": "편차 큼"
+      },
+      {
+        "sensor": "feature_172",
+        "raw_value": 0.312289,
+        "reference_mean": 0.11971367521367521,
+        "reference_median": 0.1102,
+        "reference_std": 0.0628184772090816,
+        "reference_p05": 0.047405,
+        "reference_p95": 0.2333,
+        "reference_count": 1170,
+        "z_score": 3.065584097897941,
+        "missing": false,
+        "outside_reference": true,
+        "status": "편차 큼"
+      },
+      {
+        "sensor": "feature_82",
+        "raw_value": -0.063854,
+        "reference_mean": -0.021275652173913043,
+        "reference_median": -0.019950000000000002,
+        "reference_std": 0.01626606505242444,
+        "reference_p05": -0.055375,
+        "reference_p95": 0.0027549999999999953,
+        "reference_count": 1150,
+        "z_score": -2.6176181940044985,
+        "missing": false,
+        "outside_reference": true,
+        "status": "편차 큼"
+      },
+      {
+        "sensor": "feature_217",
+        "raw_value": 0.022864,
+        "reference_mean": 0.08350591304347826,
+        "reference_median": 0.08465,
+        "reference_std": 0.024871332947861844,
+        "reference_p05": 0.04019,
+        "reference_p95": 0.11891999999999998,
+        "reference_count": 1150,
+        "z_score": -2.438225292170823,
+        "missing": false,
+        "outside_reference": true,
+        "status": "편차 큼"
+      }
+    ],
+    "missing_sensors": [
+      "feature_73",
+      "feature_113",
+      "feature_248",
+      "feature_346"
+    ],
+    "sensor_status_counts": {
+      "편차 큼": 6,
+      "편차 주의": 7,
+      "편차 낮음": 215,
+      "결측 확인": 4,
+      "기준 산포 없음": 0
+    },
+    "shap": {
+      "row_id": 183,
+      "sample_id": "2184",
+      "risk_score": 0.0175919855286681,
+      "base_value": -8.527131419418073,
+      "sum_all_shap": 4.504568134648816,
+      "model_raw_output": -4.022563284769257,
+      "units": "model raw output (binary LightGBM: log-odds)",
+      "rows": [
+        {
+          "feature": "feature_104",
+          "shap": 0.815150961764026,
+          "model_input": 0.8155836916079764
+        },
+        {
+          "feature": "feature_489",
+          "shap": 0.7067979422376471,
+          "model_input": -1.2698187026925027
+        },
+        {
+          "feature": "feature_68",
+          "shap": 0.49263841829992255,
+          "model_input": -0.05666244884835861
+        },
+        {
+          "feature": "feature_22",
+          "shap": 0.4702121093615756,
+          "model_input": 0.4413303295235278
+        },
+        {
+          "feature": "feature_60",
+          "shap": -0.40904556381863005,
+          "model_input": -0.6476612780775273
+        },
+        {
+          "feature": "feature_34",
+          "shap": 0.36932888834337047,
+          "model_input": -0.2619372465114743
+        },
+        {
+          "feature": "feature_512",
+          "shap": 0.3448420536226354,
+          "model_input": 1.720801402501545
+        },
+        {
+          "feature": "feature_548",
+          "shap": -0.3015548790889135,
+          "model_input": -1.5610324540518599
+        },
+        {
+          "feature": "feature_161",
+          "shap": -0.2711206446151862,
+          "model_input": -0.5988577753814637
+        },
+        {
+          "feature": "feature_20",
+          "shap": -0.25099232757869966,
+          "model_input": -0.4565703384722574
+        },
+        {
+          "feature": "feature_214",
+          "shap": 0.24562970237834622,
+          "model_input": 0.24233980029869062
+        },
+        {
+          "feature": "feature_132",
+          "shap": 0.24530596173159483,
+          "model_input": 0.5735778009409628
+        },
+        {
+          "feature": "feature_201",
+          "shap": 0.19647741644954345,
+          "model_input": -0.3812988036841125
+        },
+        {
+          "feature": "feature_87",
+          "shap": -0.19235020410369766,
+          "model_input": -0.7863684391413138
+        },
+        {
+          "feature": "feature_32",
+          "shap": 0.17377438612809692,
+          "model_input": -0.45830489055831136
+        }
+      ],
+      "waterfall": [
+        {
+          "feature": "feature_104",
+          "shap": 0.815150961764026,
+          "model_input": 0.8155836916079764,
+          "start": -8.527131419418073,
+          "end": -7.711980457654047
+        },
+        {
+          "feature": "feature_489",
+          "shap": 0.7067979422376471,
+          "model_input": -1.2698187026925027,
+          "start": -7.711980457654047,
+          "end": -7.0051825154164
+        },
+        {
+          "feature": "feature_68",
+          "shap": 0.49263841829992255,
+          "model_input": -0.05666244884835861,
+          "start": -7.0051825154164,
+          "end": -6.512544097116478
+        },
+        {
+          "feature": "feature_22",
+          "shap": 0.4702121093615756,
+          "model_input": 0.4413303295235278,
+          "start": -6.512544097116478,
+          "end": -6.042331987754902
+        },
+        {
+          "feature": "feature_60",
+          "shap": -0.40904556381863005,
+          "model_input": -0.6476612780775273,
+          "start": -6.042331987754902,
+          "end": -6.451377551573532
+        },
+        {
+          "feature": "feature_34",
+          "shap": 0.36932888834337047,
+          "model_input": -0.2619372465114743,
+          "start": -6.451377551573532,
+          "end": -6.082048663230161
+        },
+        {
+          "feature": "feature_512",
+          "shap": 0.3448420536226354,
+          "model_input": 1.720801402501545,
+          "start": -6.082048663230161,
+          "end": -5.737206609607526
+        },
+        {
+          "feature": "feature_548",
+          "shap": -0.3015548790889135,
+          "model_input": -1.5610324540518599,
+          "start": -5.737206609607526,
+          "end": -6.038761488696439
+        },
+        {
+          "feature": "feature_161",
+          "shap": -0.2711206446151862,
+          "model_input": -0.5988577753814637,
+          "start": -6.038761488696439,
+          "end": -6.309882133311625
+        },
+        {
+          "feature": "feature_20",
+          "shap": -0.25099232757869966,
+          "model_input": -0.4565703384722574,
+          "start": -6.309882133311625,
+          "end": -6.560874460890324
+        },
+        {
+          "feature": "feature_214",
+          "shap": 0.24562970237834622,
+          "model_input": 0.24233980029869062,
+          "start": -6.560874460890324,
+          "end": -6.315244758511978
+        },
+        {
+          "feature": "feature_132",
+          "shap": 0.24530596173159483,
+          "model_input": 0.5735778009409628,
+          "start": -6.315244758511978,
+          "end": -6.0699387967803835
+        },
+        {
+          "feature": "feature_201",
+          "shap": 0.19647741644954345,
+          "model_input": -0.3812988036841125,
+          "start": -6.0699387967803835,
+          "end": -5.87346138033084
+        },
+        {
+          "feature": "feature_87",
+          "shap": -0.19235020410369766,
+          "model_input": -0.7863684391413138,
+          "start": -5.87346138033084,
+          "end": -6.065811584434538
+        },
+        {
+          "feature": "feature_32",
+          "shap": 0.17377438612809692,
+          "model_input": -0.45830489055831136,
+          "start": -6.065811584434538,
+          "end": -5.892037198306442
+        },
+        {
+          "feature": "나머지 218개 피처",
+          "shap": 1.8694739135371843,
+          "start": -5.892037198306442,
+          "end": -4.022563284769257
+        }
+      ],
+      "feature_count": 233,
+      "risk_increase": [
+        {
+          "feature": "feature_104",
+          "shap": 0.815150961764026
+        },
+        {
+          "feature": "feature_489",
+          "shap": 0.7067979422376471
+        },
+        {
+          "feature": "feature_68",
+          "shap": 0.49263841829992255
+        },
+        {
+          "feature": "feature_22",
+          "shap": 0.4702121093615756
+        },
+        {
+          "feature": "feature_34",
+          "shap": 0.36932888834337047
+        }
+      ],
+      "risk_decrease": [
+        {
+          "feature": "feature_60",
+          "shap": -0.40904556381863005
+        },
+        {
+          "feature": "feature_548",
+          "shap": -0.3015548790889135
+        },
+        {
+          "feature": "feature_161",
+          "shap": -0.2711206446151862
+        },
+        {
+          "feature": "feature_20",
+          "shap": -0.25099232757869966
+        },
+        {
+          "feature": "feature_87",
+          "shap": -0.19235020410369766
+        }
+      ],
+      "base_risk_score": 0.00019798299357125313,
+      "reconstructed_risk_score": 0.017591985528667555,
+      "note": "모델 예측의 기여도이며 실제 고장 원인을 확정하지 않습니다."
+    },
+    "recommendation": {
+      "rule_id": "D02",
+      "title": "예방 점검 후보 검토",
+      "summary": "검토 대상으로 선택됐지만 정답 라벨은 정상입니다. 오탐 배경과 센서 이력을 대조하고 반복 편차가 있는지 확인하세요.",
+      "checks": [
+        "필수 센서 4개의 결측 및 모델 대체 입력 여부 확인",
+        "센서 원본값·결측·측정 시각과 계측 기록 대조",
+        "위험 증가와 감소 SHAP을 함께 확인",
+        "여러 표본과 시간 구간에서 편차 반복 여부 확인"
+      ],
+      "evidence": {
+        "sensor_status_counts": {
+          "편차 큼": 6,
+          "편차 주의": 7,
+          "편차 낮음": 215,
+          "결측 확인": 4,
+          "기준 산포 없음": 0
+        },
+        "top_deviations": [
+          {
+            "sensor": "feature_226",
+            "raw_value": 2598.3888,
+            "reference_mean": 1037.2896669902914,
+            "reference_median": 962.2002,
+            "reference_std": 424.71582555939887,
+            "reference_p05": 484.07968,
+            "reference_p95": 1849.7599599999996,
+            "reference_count": 1133,
+            "z_score": 3.675632126383716,
+            "missing": false,
+            "outside_reference": true,
+            "status": "편차 큼"
+          },
+          {
+            "sensor": "feature_563",
+            "raw_value": 286.7562,
+            "reference_mean": 262.83419665271964,
+            "reference_median": 264.272,
+            "reference_std": 7.329047864207341,
+            "reference_p05": 248.733,
+            "reference_p95": 273.1275,
+            "reference_count": 956,
+            "z_score": 3.2639987881792303,
+            "missing": false,
+            "outside_reference": true,
+            "status": "편차 큼"
+          },
+          {
+            "sensor": "feature_172",
+            "raw_value": 0.312289,
+            "reference_mean": 0.11971367521367521,
+            "reference_median": 0.1102,
+            "reference_std": 0.0628184772090816,
+            "reference_p05": 0.047405,
+            "reference_p95": 0.2333,
+            "reference_count": 1170,
+            "z_score": 3.065584097897941,
+            "missing": false,
+            "outside_reference": true,
+            "status": "편차 큼"
+          }
+        ],
+        "risk_increase": [
+          {
+            "feature": "feature_104",
+            "shap": 0.815150961764026
+          },
+          {
+            "feature": "feature_489",
+            "shap": 0.7067979422376471
+          },
+          {
+            "feature": "feature_68",
+            "shap": 0.49263841829992255
+          }
+        ],
+        "risk_decrease": [
+          {
+            "feature": "feature_60",
+            "shap": -0.40904556381863005
+          },
+          {
+            "feature": "feature_548",
+            "shap": -0.3015548790889135
+          },
+          {
+            "feature": "feature_161",
+            "shap": -0.2711206446151862
+          }
+        ]
+      },
+      "scope": "데이터와 점검 기록의 검토 권고입니다. 제품 통과·폐기, 부품 교체, 장비 정지 여부를 자동 결정하지 않습니다."
+    },
+    "reference_method": "학습 정상군 원본값 기준. Z=(측정값−정상 평균)/표본 표준편차(ddof=1). 중앙값과 5~95% 참고 구간은 별도로 표시합니다.",
+    "note": "1.5σ·2σ는 탐색용 표시 기준이며 설비 관리 한계가 아닙니다. SHAP과 통계로 물리적 고장 원인을 단정하지 않습니다."
+  },
+  "sensor_drift": {
+    "status": "available",
+    "scope_count": 500,
+    "time_count": 500,
+    "span_days": 150.48825231481482,
+    "analyzed_sensors": 232,
+    "direction_counts": {
+      "upward": 0,
+      "downward": 0,
+      "flat": 232
+    },
+    "rows": [
+      {
+        "sensor": "feature_170",
+        "direction": "flat",
+        "drift_index": 0.08491802090925432,
+        "normalized_drift_sigma": -0.5411729149905841,
+        "baseline_shift_sigma": -0.11612359713941713,
+        "pearson_r": -0.1566516158123954,
+        "kendall_tau": -0.15717835671342684,
+        "slope_per_day": -0.0005332176359976538,
+        "start_mean": 0.41182201000000007,
+        "end_mean": 0.39460366,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_29",
+        "direction": "flat",
+        "drift_index": 0.07984172009157466,
+        "normalized_drift_sigma": -0.6002154938295021,
+        "baseline_shift_sigma": -0.04251245467409665,
+        "pearson_r": -0.17374248477616855,
+        "kendall_tau": -0.10184491197023171,
+        "slope_per_day": -0.011930803082233129,
+        "start_mean": 69.40542599999999,
+        "end_mean": 69.278257,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_549",
+        "direction": "flat",
+        "drift_index": 0.033629323678263635,
+        "normalized_drift_sigma": 0.3708197265884422,
+        "baseline_shift_sigma": 0.2738527784941937,
+        "pearson_r": 0.10841014477195023,
+        "kendall_tau": 0.07586486397131692,
+        "slope_per_day": 0.007828270538452425,
+        "start_mean": 74.856844,
+        "end_mean": 75.72685100000001,
+        "window_count": 100,
+        "valid_time_count": 422,
+        "missing_rows": 78
+      },
+      {
+        "sensor": "feature_96",
+        "direction": "flat",
+        "drift_index": 0.03249832380041591,
+        "normalized_drift_sigma": -0.4239885523828622,
+        "baseline_shift_sigma": -0.2682925396213592,
+        "pearson_r": -0.12252404641368847,
+        "kendall_tau": -0.04795041056816461,
+        "slope_per_day": -2.8553026172871153e-07,
+        "start_mean": 7.402e-05,
+        "end_mean": 4.6830000000000004e-05,
+        "window_count": 100,
+        "valid_time_count": 499,
+        "missing_rows": 1
+      },
+      {
+        "sensor": "feature_126",
+        "direction": "flat",
+        "drift_index": 0.02778705413839851,
+        "normalized_drift_sigma": 0.3455026267528267,
+        "baseline_shift_sigma": 0.16487704047857485,
+        "pearson_r": 0.10001674597859701,
+        "kendall_tau": 0.06467100151310679,
+        "slope_per_day": 0.0006501037620587326,
+        "start_mean": 1.1818813799999999,
+        "end_mean": 1.22856818,
+        "window_count": 100,
+        "valid_time_count": 495,
+        "missing_rows": 5
+      },
+      {
+        "sensor": "feature_212",
+        "direction": "flat",
+        "drift_index": 0.027741614112527787,
+        "normalized_drift_sigma": 0.34067264963669763,
+        "baseline_shift_sigma": 0.43333336388313193,
+        "pearson_r": 0.09858950387345725,
+        "kendall_tau": 0.06726021248174943,
+        "slope_per_day": 5.756528200478905e-05,
+        "start_mean": 0.052616350000000006,
+        "end_mean": 0.0636355,
+        "window_count": 100,
+        "valid_time_count": 491,
+        "missing_rows": 9
+      },
+      {
+        "sensor": "feature_60",
+        "direction": "flat",
+        "drift_index": 0.025629829993956153,
+        "normalized_drift_sigma": -0.22623064749167915,
+        "baseline_shift_sigma": -0.16738456139609112,
+        "pearson_r": -0.06548627156714336,
+        "kendall_tau": 0.19599198396793585,
+        "slope_per_day": -0.007728991199003012,
+        "start_mean": 1.8174686800000002,
+        "end_mean": 0.9568924,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_156",
+        "direction": "flat",
+        "drift_index": 0.024744123752624993,
+        "normalized_drift_sigma": -0.34921891743334743,
+        "baseline_shift_sigma": -0.3031271597498799,
+        "pearson_r": -0.10076704249725582,
+        "kendall_tau": -0.049823028471475135,
+        "slope_per_day": -0.0022564707638239884,
+        "start_mean": 0.78166959,
+        "end_mean": 0.4869158,
+        "window_count": 100,
+        "valid_time_count": 494,
+        "missing_rows": 6
+      },
+      {
+        "sensor": "feature_551",
+        "direction": "flat",
+        "drift_index": 0.024486483249649617,
+        "normalized_drift_sigma": -0.3072997291993414,
+        "baseline_shift_sigma": -0.1907568036795589,
+        "pearson_r": -0.08983990263240772,
+        "kendall_tau": -0.07067392393490356,
+        "slope_per_day": -0.006539664067573956,
+        "start_mean": 17.268362120000003,
+        "end_mean": 16.657453999999998,
+        "window_count": 100,
+        "valid_time_count": 422,
+        "missing_rows": 78
+      },
+      {
+        "sensor": "feature_571",
+        "direction": "flat",
+        "drift_index": 0.019786142993873684,
+        "normalized_drift_sigma": -0.33351345477889344,
+        "baseline_shift_sigma": -0.28294954968115027,
+        "pearson_r": -0.09654108721830054,
+        "kendall_tau": -0.03645720607095946,
+        "slope_per_day": -0.023342739697003782,
+        "start_mean": 532.1556410000001,
+        "end_mean": 529.175409,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_140",
+        "direction": "flat",
+        "drift_index": 0.01845770287440847,
+        "normalized_drift_sigma": -0.27920249463686325,
+        "baseline_shift_sigma": -0.17379895023082068,
+        "pearson_r": -0.08101854059154953,
+        "kendall_tau": -0.053942652329749104,
+        "slope_per_day": -0.4585695244950205,
+        "start_mean": 426.94181100000003,
+        "end_mean": 383.98464300000006,
+        "window_count": 100,
+        "valid_time_count": 496,
+        "missing_rows": 4
+      },
+      {
+        "sensor": "feature_137",
+        "direction": "flat",
+        "drift_index": 0.018032942627818332,
+        "normalized_drift_sigma": -0.2890575319104071,
+        "baseline_shift_sigma": -0.1963548633073351,
+        "pearson_r": -0.08377762583504085,
+        "kendall_tau": -0.046455439464093806,
+        "slope_per_day": -0.10529266156430628,
+        "start_mean": 143.911584,
+        "end_mean": 133.147971,
+        "window_count": 100,
+        "valid_time_count": 498,
+        "missing_rows": 2
+      },
+      {
+        "sensor": "feature_32",
+        "direction": "flat",
+        "drift_index": 0.01748034079606363,
+        "normalized_drift_sigma": 0.26388917272683204,
+        "baseline_shift_sigma": 0.16767174708084864,
+        "pearson_r": 0.07638716602026138,
+        "kendall_tau": 0.05744288577154308,
+        "slope_per_day": 0.0009856187785229967,
+        "start_mean": 3.6574172300000005,
+        "end_mean": 3.7516604,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_251",
+        "direction": "flat",
+        "drift_index": 0.017296031899654743,
+        "normalized_drift_sigma": -0.27873982304620715,
+        "baseline_shift_sigma": -0.21938555973642243,
+        "pearson_r": -0.0806859369009797,
+        "kendall_tau": -0.047719630139181436,
+        "slope_per_day": -0.08222177980051518,
+        "start_mean": 115.998581,
+        "end_mean": 106.259937,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_590",
+        "direction": "flat",
+        "drift_index": 0.016505007266897357,
+        "normalized_drift_sigma": 0.26135879616602714,
+        "baseline_shift_sigma": 0.3349284005701264,
+        "pearson_r": 0.07565470590283144,
+        "kendall_tau": 0.052713426853707404,
+        "slope_per_day": 0.1851196299234412,
+        "start_mean": 91.30473241,
+        "end_mean": 127.00487300000003,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_77",
+        "direction": "flat",
+        "drift_index": 0.016445534744685596,
+        "normalized_drift_sigma": -0.26177547278999186,
+        "baseline_shift_sigma": -0.12024876987063356,
+        "pearson_r": -0.07575692975684332,
+        "kendall_tau": -0.0520973614662123,
+        "slope_per_day": -6.050930372814838e-05,
+        "start_mean": -0.02402738,
+        "end_mean": -0.028210269999999996,
+        "window_count": 100,
+        "valid_time_count": 491,
+        "missing_rows": 9
+      },
+      {
+        "sensor": "feature_16",
+        "direction": "flat",
+        "drift_index": 0.015333028999529316,
+        "normalized_drift_sigma": -0.28648150402846867,
+        "baseline_shift_sigma": -0.2193982774729438,
+        "pearson_r": -0.08285078170428792,
+        "kendall_tau": -0.034575313580506986,
+        "slope_per_day": -0.04004791473502169,
+        "start_mean": 416.34756500000003,
+        "end_mean": 411.73206099999993,
+        "window_count": 100,
+        "valid_time_count": 499,
+        "missing_rows": 1
+      },
+      {
+        "sensor": "feature_23",
+        "direction": "flat",
+        "drift_index": 0.015310726773861185,
+        "normalized_drift_sigma": 0.24202626994548979,
+        "baseline_shift_sigma": 0.021283221813914205,
+        "pearson_r": 0.0700585805493751,
+        "kendall_tau": 0.05712224448897795,
+        "slope_per_day": 0.4112162058592733,
+        "start_mean": 2711.4244450000006,
+        "end_mean": 2716.866308999999,
+        "window_count": 100,
+        "valid_time_count": 500,
+        "missing_rows": 0
+      },
+      {
+        "sensor": "feature_483",
+        "direction": "flat",
+        "drift_index": 0.015080090245339841,
+        "normalized_drift_sigma": -0.2401286876087147,
+        "baseline_shift_sigma": -0.12152816637782961,
+        "pearson_r": -0.06949242389247959,
+        "kendall_tau": -0.056752150962217876,
+        "slope_per_day": -0.44614628635449505,
+        "start_mean": 315.22000968000003,
+        "end_mean": 281.24083869000003,
+        "window_count": 100,
+        "valid_time_count": 491,
+        "missing_rows": 9
+      },
+      {
+        "sensor": "feature_59",
+        "direction": "flat",
+        "drift_index": 0.014992692760132329,
+        "normalized_drift_sigma": -0.25734370447863836,
+        "baseline_shift_sigma": -0.1401758587183015,
+        "pearson_r": -0.07444800855223703,
+        "kendall_tau": -0.04559099816202542,
+        "slope_per_day": -0.00014267930125276586,
+        "start_mean": 4.60351235,
+        "end_mean": 4.59181673,
+        "window_count": 100,
+        "valid_time_count": 498,
+        "missing_rows": 2
+      }
+    ],
+    "time_series": [
+      {
+        "sensor": "feature_170",
+        "rows": [
+          {
+            "period": "2008-11",
+            "mean": 0.41182201,
+            "count": 100
+          },
+          {
+            "period": "2008-12",
+            "mean": 0.55418316,
+            "count": 100
+          },
+          {
+            "period": "2009-01",
+            "mean": 0.39098441,
+            "count": 100
+          },
+          {
+            "period": "2009-02",
+            "mean": 0.39431526,
+            "count": 100
+          },
+          {
+            "period": "2009-03",
+            "mean": 0.39460366,
+            "count": 100
+          }
+        ]
+      },
+      {
+        "sensor": "feature_29",
+        "rows": [
+          {
+            "period": "2008-11",
+            "mean": 69.40542599999999,
+            "count": 100
+          },
+          {
+            "period": "2008-12",
+            "mean": 73.337608,
+            "count": 100
+          },
+          {
+            "period": "2009-01",
+            "mean": 69.645149,
+            "count": 100
+          },
+          {
+            "period": "2009-02",
+            "mean": 69.210644,
+            "count": 100
+          },
+          {
+            "period": "2009-03",
+            "mean": 69.278257,
+            "count": 100
+          }
+        ]
+      },
+      {
+        "sensor": "feature_549",
+        "rows": [
+          {
+            "period": "2008-11",
+            "mean": 74.82482471910113,
+            "count": 89
+          },
+          {
+            "period": "2008-12",
+            "mean": 74.98869390243902,
+            "count": 82
+          },
+          {
+            "period": "2009-01",
+            "mean": 75.86421529411766,
+            "count": 85
+          },
+          {
+            "period": "2009-02",
+            "mean": 75.67257380952381,
+            "count": 84
+          },
+          {
+            "period": "2009-03",
+            "mean": 75.65590609756097,
+            "count": 82
+          }
+        ]
+      }
+    ],
+    "method": "결측 제외, 같은 시각은 평균. 실제 경과 일수 기준 회귀·Pearson r·Kendall tau, 겹치지 않는 초기/후기 최대 100개 시각의 평균 비교.",
+    "note": "상승·하강 분류는 |표준화 이동|≥1 및 |기저 이동|≥0.7과 tau 방향 일치의 탐색 규칙이며 물리적 마모·정비 효과를 입증하지 않습니다.",
+    "charts": [
+      {
+        "data": [
+          {
+            "type": "bar",
+            "x": [
+              "feature_170",
+              "feature_29",
+              "feature_549",
+              "feature_96",
+              "feature_126",
+              "feature_212",
+              "feature_60",
+              "feature_156",
+              "feature_551",
+              "feature_571",
+              "feature_140",
+              "feature_137",
+              "feature_32",
+              "feature_251",
+              "feature_590",
+              "feature_77",
+              "feature_16",
+              "feature_23",
+              "feature_483",
+              "feature_59"
+            ],
+            "y": [
+              0.08491802090925432,
+              0.07984172009157466,
+              0.033629323678263635,
+              0.03249832380041591,
+              0.02778705413839851,
+              0.027741614112527787,
+              0.025629829993956153,
+              0.024744123752624993,
+              0.024486483249649617,
+              0.019786142993873684,
+              0.01845770287440847,
+              0.018032942627818332,
+              0.01748034079606363,
+              0.017296031899654743,
+              0.016505007266897357,
+              0.016445534744685596,
+              0.015333028999529316,
+              0.015310726773861185,
+              0.015080090245339841,
+              0.014992692760132329
+            ]
+          }
+        ],
+        "layout": {
+          "title": "시간 변화 종합 드리프트 지수",
+          "margin": {
+            "t": 55,
+            "b": 90,
+            "l": 60,
+            "r": 20
+          }
+        }
+      },
+      {
+        "data": [
+          {
+            "type": "scatter",
+            "x": [
+              "2008-11",
+              "2008-12",
+              "2009-01",
+              "2009-02",
+              "2009-03"
+            ],
+            "y": [
+              0.41182201,
+              0.55418316,
+              0.39098441,
+              0.39431526,
+              0.39460366
+            ],
+            "mode": "lines+markers"
+          }
+        ],
+        "layout": {
+          "title": "feature_170 월별 원본 평균",
+          "margin": {
+            "t": 55,
+            "b": 90,
+            "l": 60,
+            "r": 20
+          }
+        }
+      },
+      {
+        "data": [
+          {
+            "type": "scatter",
+            "x": [
+              "2008-11",
+              "2008-12",
+              "2009-01",
+              "2009-02",
+              "2009-03"
+            ],
+            "y": [
+              69.40542599999999,
+              73.337608,
+              69.645149,
+              69.210644,
+              69.278257
+            ],
+            "mode": "lines+markers"
+          }
+        ],
+        "layout": {
+          "title": "feature_29 월별 원본 평균",
+          "margin": {
+            "t": 55,
+            "b": 90,
+            "l": 60,
+            "r": 20
+          }
+        }
+      },
+      {
+        "data": [
+          {
+            "type": "scatter",
+            "x": [
+              "2008-11",
+              "2008-12",
+              "2009-01",
+              "2009-02",
+              "2009-03"
+            ],
+            "y": [
+              74.82482471910113,
+              74.98869390243902,
+              75.86421529411766,
+              75.67257380952381,
+              75.65590609756097
+            ],
+            "mode": "lines+markers"
+          }
+        ],
+        "layout": {
+          "title": "feature_549 월별 원본 평균",
+          "margin": {
+            "t": 55,
+            "b": 90,
+            "l": 60,
+            "r": 20
+          }
+        }
+      }
+    ]
+  },
+  "global_shap": {
+    "scope_count": 500,
+    "analyzed_count": 200,
+    "sampling": "원본 행 순서에서 균등 간격 표본 선택",
+    "rows": [
+      {
+        "feature": "feature_34",
+        "mean_abs_shap": 0.4640123220593022,
+        "rank": 1
+      },
+      {
+        "feature": "feature_60",
+        "mean_abs_shap": 0.39297823612134275,
+        "rank": 2
+      },
+      {
+        "feature": "feature_104",
+        "mean_abs_shap": 0.2880905123590423,
+        "rank": 3
+      },
+      {
+        "feature": "feature_32",
+        "mean_abs_shap": 0.2749420739513452,
+        "rank": 4
+      },
+      {
+        "feature": "feature_489",
+        "mean_abs_shap": 0.2495673520056316,
+        "rank": 5
+      },
+      {
+        "feature": "feature_214",
+        "mean_abs_shap": 0.23765722284247215,
+        "rank": 6
+      },
+      {
+        "feature": "feature_248",
+        "mean_abs_shap": 0.21622643761206953,
+        "rank": 7
+      },
+      {
+        "feature": "feature_22",
+        "mean_abs_shap": 0.16790321002228165,
+        "rank": 8
+      },
+      {
+        "feature": "feature_201",
+        "mean_abs_shap": 0.15601943582580519,
+        "rank": 9
+      },
+      {
+        "feature": "feature_87",
+        "mean_abs_shap": 0.1506857135842333,
+        "rank": 10
+      },
+      {
+        "feature": "feature_132",
+        "mean_abs_shap": 0.14848038254346055,
+        "rank": 11
+      },
+      {
+        "feature": "feature_130",
+        "mean_abs_shap": 0.14797137087299495,
+        "rank": 12
+      },
+      {
+        "feature": "feature_131",
+        "mean_abs_shap": 0.13918321859603888,
+        "rank": 13
+      },
+      {
+        "feature": "feature_161",
+        "mean_abs_shap": 0.12294038860272534,
+        "rank": 14
+      },
+      {
+        "feature": "feature_184",
+        "mean_abs_shap": 0.1216492940586074,
+        "rank": 15
+      }
+    ],
+    "note": "평균 절대 SHAP은 모델 영향도이며 고장 원인이나 인과 효과가 아닙니다.",
+    "charts": [
+      {
+        "data": [
+          {
+            "type": "bar",
+            "x": [
+              "feature_34",
+              "feature_60",
+              "feature_104",
+              "feature_32",
+              "feature_489",
+              "feature_214",
+              "feature_248",
+              "feature_22",
+              "feature_201",
+              "feature_87",
+              "feature_132",
+              "feature_130",
+              "feature_131",
+              "feature_161",
+              "feature_184"
+            ],
+            "y": [
+              0.4640123220593022,
+              0.39297823612134275,
+              0.2880905123590423,
+              0.2749420739513452,
+              0.2495673520056316,
+              0.23765722284247215,
+              0.21622643761206953,
+              0.16790321002228165,
+              0.15601943582580519,
+              0.1506857135842333,
+              0.14848038254346055,
+              0.14797137087299495,
+              0.13918321859603888,
+              0.12294038860272534,
+              0.1216492940586074
+            ]
+          }
+        ],
+        "layout": {
+          "title": "평균 절대 SHAP 중요도",
+          "margin": {
+            "t": 55,
+            "b": 90,
+            "l": 60,
+            "r": 20
+          }
+        }
+      }
+    ]
+  }
+}

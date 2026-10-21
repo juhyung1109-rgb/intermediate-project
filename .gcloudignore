@@ -1,0 +1,17 @@
+.gcloudignore
+.git
+.github
+.venv
+venv
+**/__pycache__
+**/*.pyc
+**/.ipynb_checkpoints
+notebooks/
+scratch/
+archive/
+runtime/
+.env
+*.zip
+*.pptx
+artifacts/analysis_reports/*.sqlite3*
+picture/

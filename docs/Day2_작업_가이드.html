@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SECOM 반도체 공정 데이터 대시보드 - Day 2 종합 마스터 작업 가이드</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --primary-soft: #eff6ff;
+      --secondary: #0f766e;
+      --secondary-light: #14b8a6;
+      --secondary-soft: #f0fdfa;
+      --accent: #f59e0b;
+      --accent-soft: #fffbeb;
+      --danger: #ef4444;
+      --danger-soft: #fef2f2;
+      --dark: #0f172a;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-width: 300px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      display: flex;
+    }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: #0f172a;
+      color: #94a3b8;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 1px solid #1e293b;
+    }
+
+    .sidebar-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+      color: #f8fafc;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item a:hover, .nav-item.active a {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: #f8fafc;
+    }
+
+    .nav-item .nav-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .nav-item a:hover .nav-num {
+      color: #60a5fa;
+    }
+
+    /* Main Container */
+    main.content {
+      flex: 1;
+      max-width: 1100px;
+      padding: 44px 52px 96px;
+      margin: 0 auto;
+    }
+
+    /* Header Banner */
+    .doc-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      color: white;
+      padding: 40px 36px;
+      border-radius: 18px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+    }
+
+    .doc-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .doc-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .doc-subtitle {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-item strong {
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+
+    /* Section Cards */
+    section.section-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 34px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      scroll-margin-top: 24px;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--primary-soft);
+    }
+
+    .section-title .section-num {
+      background: var(--primary);
+      color: white;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .subsection-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subsection-title::before {
+      content: "";
+      width: 4px;
+      height: 16px;
+      background-color: var(--primary);
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    p {
+      color: #334155;
+      font-size: 0.96rem;
+      margin-bottom: 16px;
+      line-height: 1.75;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: var(--dark);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-pass {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-p0 {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .badge-blue {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-id {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Callout */
+    .callout {
+      border-left: 4px solid var(--primary-light);
+      background-color: var(--primary-soft);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+
+    .callout-warning {
+      border-left-color: var(--accent);
+      background-color: var(--accent-soft);
+    }
+
+    .callout-success {
+      border-left-color: #22c55e;
+      background-color: #f0fdf4;
+    }
+
+    .callout strong {
+      color: var(--dark);
+    }
+
+    /* Code Blocks */
+    pre {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 18px 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      margin: 16px 0 24px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+    }
+
+    p code, td code, li code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .function { color: #38bdf8; }
+    .string { color: #a3e635; }
+    .comment { color: #64748b; font-style: italic; }
+    .number { color: #fb923c; }
+
+    /* Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .mini-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .mini-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mini-card-title {
+      font-weight: 700;
+      color: var(--dark);
+      font-size: 1rem;
+    }
+
+    .mini-card p {
+      font-size: 0.88rem;
+      color: #475569;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar { display: none; }
+      main.content { padding: 24px 20px 60px; }
+      .doc-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">SECOM 데이터 대시보드<br>Day 2 작업 가이드</div>
+      <span class="sidebar-badge">DAY 2 MASTER SPEC</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#sec01"><span class="nav-num">01</span> Day 2 핵심 목표 & 단계</a></li>
+      <li class="nav-item"><a href="#sec02"><span class="nav-num">02</span> 핵심 설계 4대 원칙</a></li>
+      <li class="nav-item"><a href="#sec03"><span class="nav-num">03</span> Step 1: 위험도 예측 & 동점 순위</a></li>
+      <li class="nav-item"><a href="#sec04"><span class="nav-num">04</span> Step 2: Top-k% 동적 성과 지표</a></li>
+      <li class="nav-item"><a href="#sec05"><span class="nav-num">05</span> Step 3: 정상 참고 분포 비교 엔진</a></li>
+      <li class="nav-item"><a href="#sec06"><span class="nav-num">06</span> Step 4: 대화형 시각화 4종 (V03~V06)</a></li>
+      <li class="nav-item"><a href="#sec07"><span class="nav-num">07</span> Step 5: 300 DPI 발표 차트 생성</a></li>
+      <li class="nav-item"><a href="#sec08"><span class="nav-num">08</span> Step 6: Streamlit UI 전면 통합</a></li>
+      <li class="nav-item"><a href="#sec09"><span class="nav-num">09</span> C03~C06 완료 검증 대조표</a></li>
+      <li class="nav-item"><a href="#sec10"><span class="nav-num">10</span> 빠른 실행 및 재현 안내</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Header Banner -->
+    <header class="doc-header">
+      <div class="doc-category">
+        <span>⚙️ SEMICONDUCTOR AI DASHBOARD</span>
+      </div>
+      <h1 class="doc-title">SECOM 반도체 공정 대시보드 - Day 2 종합 마스터 가이드</h1>
+      <p class="doc-subtitle">대화형 위험 순위 탐색, 정상 참고 비교 엔진, V03~V06 반응형 차트 및 Streamlit 대시보드 풀스택 완성</p>
+      
+      <div class="doc-meta">
+        <div class="meta-item"><span>📌 진행 차수:</span> <strong>Day 2 종합 완주</strong></div>
+        <div class="meta-item"><span>🎯 검증 목표:</span> <strong>기획서 C03, C04, C05, C06 전수 100% 통과</strong></div>
+        <div class="meta-item"><span>⏱️ 권장 소요:</span> <strong>약 4시간</strong></div>
+        <div class="meta-item"><span>🐍 실행 커널:</span> <strong>Python (DS)</strong></div>
+      </div>
+    </header>
+
+    <!-- 01 핵심 단계 요약 -->
+    <section id="sec01" class="section-card">
+      <h2 class="section-title"><span class="section-num">01</span> Day 2 핵심 목표 & 산출물 요약</h2>
+      <p>
+        Day 1에서 확립한 정합성 검증 데이터와 L1 로지스틱 회귀 기준 모델(Recall 41.7%, ROC-AUC 0.700)을 바탕으로, 
+        오늘은 <strong>실제 생산 현장에서 웨이퍼를 선별하고 이상 센서를 진단하는 대화형 서비스 파이프라인</strong>을 완성합니다.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 14%;">단계</th>
+              <th style="width: 44%;">주요 구현 내용</th>
+              <th style="width: 26%;">결과 파일 및 객체</th>
+              <th style="width: 16%;">검증 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Step 1</strong></td>
+              <td><strong>불량 위험도 예측 및 순위 판정 엔진</strong><br>• Test 세트(314건) 위험도 점수 계산<br>• 동일 점수 동점 발생 시 <code>sample_id</code> 오름차순 안정 정렬<br>• 상위 20% 플래그(63개) 부여</td>
+              <td><code>artifacts/test_predictions.csv</code><br><code>src/analysis.py</code><br>(<code>predict_risk()</code>)</td>
+              <td><span class="badge badge-pass">C03 PASS</span><br>결정론적 동점 처리</td>
+            </tr>
+            <tr>
+              <td><strong>Step 2</strong></td>
+              <td><strong>상위 탐색 비율(Top-k%) 동적 지표 계산</strong><br>• 5% ~ 50% 슬라이더 조절 지원<br>• 올림 규칙 $\lceil N \times \text{ratio} \rceil$ 선정 수 계산<br>• 비율별 Recall, Precision 및 전체 AP 산출</td>
+              <td><code>src/analysis.py</code><br>(<code>calculate_review_metrics()</code>)</td>
+              <td><span class="badge badge-pass">C03 PASS</span><br>탐색 지표 분리</td>
+            </tr>
+            <tr>
+              <td><strong>Step 3</strong></td>
+              <td><strong>학습 정상 참고 분포 비교 엔진</strong><br>• 학습 정상(1,170건) 5~95 백분위 및 중앙값 산출<br>• 선택 고위험 샘플의 원값/대체값/편차 계산<br>• 정상 대비 이상 편차 상위 5대 센서 자동 선별</td>
+              <td><code>src/analysis.py</code><br>(<code>compare_reference()</code>)</td>
+              <td><span class="badge badge-pass">C04 PASS</span><br>결측 대체 보존</td>
+            </tr>
+            <tr>
+              <td><strong>Step 4</strong></td>
+              <td><strong>대화형 시각화 4종(V03~V06) 신규 개발</strong><br>• <strong>V03</strong>: 선택 센서 히스토그램 & 그룹별 밀도 & 박스플롯<br>• <strong>V04</strong>: 314건 위험 순위 산점도 & 검토 비율 컷오프<br>• <strong>V05</strong>: 이상 센서 5종 정상 참고 구간 비교 바/레이더<br>• <strong>V06</strong>: 테스트 314건 성능 평가 혼동행렬</td>
+              <td><code>src/visualization.py</code><br>(<code>build_v03</code> ~ <code>build_v06</code>)</td>
+              <td><span class="badge badge-pass">C05 PASS</span><br>차트-표 수치 일치</td>
+            </tr>
+            <tr>
+              <td><strong>Step 5</strong></td>
+              <td><strong>발표 및 보고서용 300 DPI 차트 일괄 생성</strong><br>• V03, V04, V05, V06 고해상도 PNG & HTML 생성</td>
+              <td><code>picture/V03~V06.*</code></td>
+              <td><span class="badge badge-pass">300 DPI 완비</span></td>
+            </tr>
+            <tr>
+              <td><strong>Step 6</strong></td>
+              <td><strong>Streamlit 웹 대시보드 전면 인터랙티브 통합</strong><br>• 5대 섹션 탭 구성 및 사이드바 제어 패널 완성</td>
+              <td><code>app.py</code></td>
+              <td><span class="badge badge-pass">실시간 연동</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 02 설계 원칙 -->
+    <section id="sec02" class="section-card">
+      <h2 class="section-title"><span class="section-num">02</span> 핵심 설계 4대 원칙</h2>
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">1. 결정론적 동점 순위 (Tie-Breaking)</span>
+            <span class="badge badge-blue">C03</span>
+          </div>
+          <p>로지스틱 회귀에서 동일한 위험 점수가 나올 경우, <code>risk_score</code> 내림차순 후 <code>sample_id</code> 오름차순(first 방식)으로 고정 정렬하여 언제 실행해도 순위가 100% 동일하게 재현되도록 보장합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">2. 표본 수 올림 (math.ceil) 규격</span>
+            <span class="badge badge-blue">C03</span>
+          </div>
+          <p>기획서 명세에 따라 상위 $k\%$ 표본 선정 시 $N_{selected} = \lceil N \times \text{ratio} \rceil$를 적용합니다. (Test 314건의 20% = $314 \times 0.20 = 62.8 \rightarrow$ <strong>63개</strong> 정확 일치)</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">3. 정상 참고 구간 (5~95 백분위)</span>
+            <span class="badge badge-blue">C04</span>
+          </div>
+          <p>공정 장비의 물리적 하드웨어 Spec이 제공되지 않으므로, '장비 절대 공차'가 아닌 <strong>'데이터 기반 학습 정상 집단의 통계적 분포(5~95 Percentile)'</strong>임을 UI에 명확히 표기합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">4. 분류와 순위 성과의 분리</span>
+            <span class="badge badge-blue">C06</span>
+          </div>
+          <p>혼동행렬의 기본 전수 합계는 $TP+FP+FN+TN=314$건이어야 하며, 기본 임계값 0.5 분류 성과와 상위 20%(63개) 우선 검토 시의 비즈니스 성과를 엄격히 분리하여 표시합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 Step 1 -->
+    <section id="sec03" class="section-card">
+      <h2 class="section-title"><span class="section-num">03</span> Step 1: 위험도 예측 & 결정론적 동점 순위 로직</h2>
+      <p>
+        누수 방지 원칙에 따라 Train 데이터로만 피팅된 <code>preprocessor.joblib</code>와 <code>baseline_model.joblib</code>를 로드하여 
+        Test 세트 314건의 위험 점수(Risk Score)를 추론하고, 기획서 C03 규격에 맞는 안정적 동점 순위를 부여합니다.
+      </p>
+
+      <pre><code><span class="keyword">import</span> math
+<span class="keyword">import</span> joblib
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+<span class="keyword">def</span> <span class="function">predict_risk</span>(preprocessor_path, model_path, df_features, df_labels):
+    <span class="comment"># 1. 영속화 객체 로드 (전처리 파이프라인 & 232개 유효 센서 명단)</span>
+    prep_dict = joblib.load(preprocessor_path)
+    preprocessor = prep_dict[<span class="string">'preprocessor'</span>]
+    valid_features = prep_dict[<span class="string">'valid_features'</span>]
+    model = joblib.load(model_path)
+
+    <span class="comment"># 2. Test 피처 정렬 및 전처리 (누수 없이 Train 파이프라인 적용)</span>
+    test_sample_ids = df_labels[<span class="string">'sample_id'</span>].values
+    df_test_feat = df_features[df_features[<span class="string">'sample_id'</span>].isin(test_sample_ids)].copy()
+    df_test_feat = df_test_feat.set_index(<span class="string">'sample_id'</span>).loc[test_sample_ids]
+    
+    X_test_scaled = preprocessor.transform(df_test_feat[valid_features])
+
+    <span class="comment"># 3. 불량 위험 점수(Risk Score) 산출 (클래스 1의 예측 확률)</span>
+    risk_scores = model.predict_proba(X_test_scaled)[:, <span class="number">1</span>]
+
+    df_pred = pd.DataFrame({
+        <span class="string">'sample_id'</span>: test_sample_ids,
+        <span class="string">'actual_label'</span>: df_labels[<span class="string">'label'</span>].values,
+        <span class="string">'risk_score'</span>: risk_scores
+    })
+
+    <span class="comment"># 4. 결정론적 동점 처리: risk_score 내림차순 -> sample_id 오름차순 (C03)</span>
+    df_pred = df_pred.sort_values(
+        by=[<span class="string">'risk_score'</span>, <span class="string">'sample_id'</span>],
+        ascending=[<span class="keyword">False</span>, <span class="keyword">True</span>]
+    ).reset_index(drop=<span class="keyword">True</span>)
+    df_pred[<span class="string">'risk_rank'</span>] = range(<span class="number">1</span>, len(df_pred) + <span class="number">1</span>)
+
+    <span class="comment"># 5. 상위 20% 플래그 부여 (ceil 규칙: 314 * 0.20 = 62.8 -> 63개)</span>
+    top20_cutoff = math.ceil(len(df_pred) * <span class="number">0.20</span>)
+    df_pred[<span class="string">'is_top20pct'</span>] = df_pred[<span class="string">'risk_rank'</span>] <= top20_cutoff
+
+    <span class="keyword">return</span> df_pred</code></pre>
+    </section>
+
+    <!-- 04 Step 2 -->
+    <section id="sec04" class="section-card">
+      <h2 class="section-title"><span class="section-num">04</span> Step 2: Top-k% 동적 성과 지표 산출 로직</h2>
+      <p>
+        사용자가 슬라이더로 검토 비율(5%~50%)을 동적으로 변경할 때, 해당 비율 내에서 검출된 불량 웨이퍼 수와 
+        <strong>Recall@k%</strong> 및 <strong>Precision@k%</strong>를 실시간으로 재계산합니다.
+      </p>
+
+      <pre><code><span class="keyword">import</span> math
+<span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> average_precision_score
+
+<span class="keyword">def</span> <span class="function">calculate_review_metrics</span>(df_predictions, ratio=<span class="number">0.20</span>):
+    n_total = len(df_predictions)
+    n_fails_total = (df_predictions[<span class="string">'actual_label'</span>] == <span class="number">1</span>).sum()
+    n_selected = math.ceil(n_total * ratio)
+
+    selected_subset = df_predictions[df_predictions[<span class="string">'risk_rank'</span>] <= n_selected]
+    n_detected_fails = (selected_subset[<span class="string">'actual_label'</span>] == <span class="number">1</span>).sum()
+
+    recall_at_k = (n_detected_fails / n_fails_total if n_fails_total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>) * <span class="number">100</span>
+    precision_at_k = (n_detected_fails / n_selected if n_selected > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>) * <span class="number">100</span>
+    ap_score = average_precision_score(df_predictions[<span class="string">'actual_label'</span>], df_predictions[<span class="string">'risk_score'</span>])
+
+    <span class="keyword">return</span> {
+        <span class="string">'review_ratio'</span>: ratio,
+        <span class="string">'review_ratio_pct'</span>: ratio * <span class="number">100</span>,
+        <span class="string">'n_total'</span>: n_total,
+        <span class="string">'n_selected'</span>: n_selected,
+        <span class="string">'n_fails_total'</span>: n_fails_total,
+        <span class="string">'n_detected_fails'</span>: n_detected_fails,
+        <span class="string">'recall_at_k'</span>: recall_at_k,
+        <span class="string">'precision_at_k'</span>: precision_at_k,
+        <span class="string">'average_precision'</span>: ap_score
+    }</code></pre>
+    </section>
+
+    <!-- 05 Step 3 -->
+    <section id="sec05" class="section-card">
+      <h2 class="section-title"><span class="section-num">05</span> Step 3: 정상 참고 분포 비교 엔진</h2>
+      <p>
+        특정 고위험 웨이퍼를 선택했을 때, <strong>학습 정상 집단(1,170건)의 센서별 5~95 백분위 및 중앙값</strong>과 비교하여 
+        정상 범위에서 가장 크게 이탈한 핵심 센서 5종을 자동으로 발굴합니다.
+      </p>
+
+      <div class="callout callout-warning">
+        <strong>⚠️ 무결성 보존:</strong> 원측정값에 결측이 있었는지 여부(<code>was_imputed</code>)를 반드시 기록하여, 
+        중앙값으로 대체된 값인지 실제 측정된 값인지를 공정 엔지니어가 명확히 구별할 수 있도록 합니다.
+      </div>
+
+      <pre><code><span class="keyword">def</span> <span class="function">compare_reference</span>(df_features_raw, train_normal_ids, selected_sample_id, valid_features, top_n=<span class="number">5</span>):
+    df_raw_indexed = df_features_raw.set_index(<span class="string">'sample_id'</span>)
+    train_normal_feats = df_raw_indexed.loc[df_raw_indexed.index.isin(train_normal_ids), valid_features]
+
+    <span class="comment"># 1. 학습 정상 통계량 계산</span>
+    norm_median = train_normal_feats.median()
+    norm_mean = train_normal_feats.mean()
+    norm_std = train_normal_feats.std().replace(<span class="number">0</span>, <span class="number">1e-6</span>)
+    norm_p05 = train_normal_feats.quantile(<span class="number">0.05</span>)
+    norm_p95 = train_normal_feats.quantile(<span class="number">0.95</span>)
+
+    <span class="comment"># 2. 선택 샘플 및 편차 계산</span>
+    sample_series = df_raw_indexed.loc[selected_sample_id, valid_features]
+    is_missing = sample_series.isna()
+    imputed_values = sample_series.fillna(norm_median)
+
+    z_scores = (imputed_values - norm_mean) / norm_std
+    top_deviated_sensors = z_scores.abs().sort_values(ascending=<span class="keyword">False</span>).head(top_n).index.tolist()
+
+    <span class="comment"># 3. 5대 이상 센서 상세 비교 테이블 구성</span>
+    rows = []
+    <span class="keyword">for</span> sensor <span class="keyword">in</span> top_deviated_sensors:
+        rows.append({
+            <span class="string">'sensor_id'</span>: sensor,
+            <span class="string">'original_value'</span>: np.nan <span class="keyword">if</span> is_missing[sensor] <span class="keyword">else</span> round(float(sample_series[sensor]), <span class="number">4</span>),
+            <span class="string">'imputed_value'</span>: round(float(imputed_values[sensor]), <span class="number">4</span>),
+            <span class="string">'was_imputed'</span>: bool(is_missing[sensor]),
+            <span class="string">'normal_p05'</span>: round(float(norm_p05[sensor]), <span class="number">4</span>),
+            <span class="string">'normal_median'</span>: round(float(norm_median[sensor]), <span class="number">4</span>),
+            <span class="string">'normal_p95'</span>: round(float(norm_p95[sensor]), <span class="number">4</span>),
+            <span class="string">'z_score'</span>: round(float(z_scores[sensor]), <span class="number">2</span>),
+            <span class="string">'is_out_of_bounds'</span>: (imputed_values[sensor] < norm_p05[sensor]) or (imputed_values[sensor] > norm_p95[sensor])
+        })
+    <span class="keyword">return</span> pd.DataFrame(rows)</code></pre>
+    </section>
+
+    <!-- 06 Step 4 -->
+    <section id="sec06" class="section-card">
+      <h2 class="section-title"><span class="section-num">06</span> Step 4: 대화형 시각화 4종 명세 (V03 ~ V06)</h2>
+      
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">V03 선택 센서 분포 & 이상치</span>
+            <span class="badge badge-blue">S03 센서 탐색</span>
+          </div>
+          <p>드롭다운에서 센서를 선택하면 히스토그램 + 정상/불량 그룹별 밀도(Density) 곡선 + 박스플롯이 결합된 종합 뷰를 렌더링합니다. 결측치 개수와 왜도(|Skewness|)를 배지로 강조합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">V04 위험 순위 슬라이더 탐색</span>
+            <span class="badge badge-blue">S04 위험 샘플</span>
+          </div>
+          <p>Test 314건의 위험 점수를 1위부터 314위까지 폭포수/산점도로 배열하고, 상위 검토 비율(Top-k%) 슬라이더에 따라 실시간으로 컷오프 경계선과 하이라이트 영역을 전환합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">V05 정상 참고 비교 프로파일</span>
+            <span class="badge badge-blue">S04 위험 샘플</span>
+          </div>
+          <p>선택된 고위험 웨이퍼의 5대 이상 센서 측정값과 학습 정상의 5~95 백분위 정상 참고 구간을 대조하는 에러바/범위 바 차트를 표출합니다. 결측 대체 상태를 배지로 안내합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">V06 성능 평가 혼동행렬</span>
+            <span class="badge badge-blue">S05 모델 평가</span>
+          </div>
+          <p>Test 314건 전수에 대한 실제 라벨 vs 예측 라벨의 $2 \times 2$ 혼동행렬(TP, FP, FN, TN) 히트맵을 생성하고, 임계값 0.5 성과와 상위 20% 우선 검토 성과를 나란히 배치합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 Step 5 & 6 -->
+    <section id="sec07" class="section-card">
+      <h2 class="section-title"><span class="section-num">07</span> Step 5 & 6: 300 DPI 차트 및 Streamlit 대시보드 연동</h2>
+      <p>
+        모든 인터랙티브 차트는 보고서 및 발표 슬라이드에 즉시 삽입할 수 있도록 
+        <code>src/save_charts.py</code>를 통해 <strong>300 DPI 고해상도 PNG</strong>로도 일괄 렌더링됩니다.
+      </p>
+
+      <div class="callout callout-success">
+        <strong>🌐 대시보드 5대 화면 구성 (Streamlit):</strong>
+        <ol style="margin-left: 20px; margin-top: 8px;">
+          <li><strong>S01 데이터 개요</strong>: 원본 1,567행 590열 요약, V01 불균형 차트, V02 결측률 상위 20개 차트</li>
+          <li><strong>S02 분석 추천 규칙</strong>: R01~R06 실시간 추천 카드 및 R05 월별 생산량/불량률 추이</li>
+          <li><strong>S03 센서 탐색</strong>: 센서 드롭다운 선택, V03 분포 & 이상치 분석 차트</li>
+          <li><strong>S04 위험 샘플 탐색</strong>: 검토 비율(Top-k%) 슬라이더, V04 위험 순위 차트, 샘플 선택 테이블, V05 정상 참고 비교 차트</li>
+          <li><strong>S05 모델 평가</strong>: V06 혼동행렬 히트맵, 고정 분류 지표 vs 순위 검토 성과표, AP 성과</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 09 C03~C06 검증표 -->
+    <section id="sec09" class="section-card">
+      <h2 class="section-title"><span class="section-num">09</span> 기획서 완료 검증 기준 대조표 (C03 ~ C06 100% PASS 목표)</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 14%;">검증 코드</th>
+              <th style="width: 24%;">검증 항목</th>
+              <th style="width: 38%;">기획서 명세 기준</th>
+              <th style="width: 24%;">판정 로직 및 기대치</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-id">C03-1</span></td>
+              <td><strong>결정론적 동점 처리</strong></td>
+              <td>동일 점수 발생 시 sample_id 오름차순 안정 정렬</td>
+              <td><span class="badge badge-pass">PASS</span> 순위 역전 0건</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C03-2</span></td>
+              <td><strong>올림(ceil) 선정 수</strong></td>
+              <td>$\lceil 314 \times 0.20 \rceil = 62.8 \rightarrow \mathbf{63}$개</td>
+              <td><span class="badge badge-pass">PASS</span> 63개 정확 일치</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C03-3</span></td>
+              <td><strong>탐색 비율 변경</strong></td>
+              <td>5~50% 슬라이더 조작 시 선정 수·지표 갱신</td>
+              <td><span class="badge badge-pass">PASS</span> 실시간 갱신 확인</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C04-1</span></td>
+              <td><strong>선택 ID 일치</strong></td>
+              <td>화면에서 선택한 sample_id와 센서 데이터 일치</td>
+              <td><span class="badge badge-pass">PASS</span> 1:1 매핑 일치</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C04-2</span></td>
+              <td><strong>원값 vs 대체값 구분</strong></td>
+              <td>결측치 대체 상태(was_imputed) 명확 구분</td>
+              <td><span class="badge badge-pass">PASS</span> NaN 보존 확인</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C04-3</span></td>
+              <td><strong>정상 참고 구간 대조</strong></td>
+              <td>학습 정상(1,170건)의 5~95 백분위 대조</td>
+              <td><span class="badge badge-pass">PASS</span> 구간 이탈 정확 판정</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C05-1</span></td>
+              <td><strong>차트와 표 수치 일치</strong></td>
+              <td>V01~V06 차트 수치와 화면/보고서 표 일치</td>
+              <td><span class="badge badge-pass">PASS</span> 단일 객체 렌더링</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C06-1</span></td>
+              <td><strong>혼동행렬 전수 일치</strong></td>
+              <td>$TP + FP + FN + TN = 314$건 (Test 전체 수)</td>
+              <td><span class="badge badge-pass">PASS</span> 합계 314건 검증</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C06-2</span></td>
+              <td><strong>분류와 순위 지표 분리</strong></td>
+              <td>기본 임계값 0.5 분류와 상위 20% 순위 지표 분리</td>
+              <td><span class="badge badge-pass">PASS</span> 2단 분리 카드 표출</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 10 빠른 실행 안내 -->
+    <section id="sec10" class="section-card">
+      <h2 class="section-title"><span class="section-num">10</span> 빠른 실행 및 재현 안내</h2>
+      <pre><code><span class="comment"># 1. miniconda DS 환경 활성화</span>
+conda activate DS
+
+<span class="comment"># 2. 발표용 300 DPI 차트 일괄 생성 (V01 ~ V06 전체)</span>
+& <span class="string">"C:\ProgramData\miniconda3\envs\DS\python.exe"</span> src/save_charts.py
+
+<span class="comment"># 3. Streamlit 대화형 웹 대시보드 실행</span>
+streamlit run app.py</code></pre>
+    </section>
+
+  </main>
+</body>
+</html>

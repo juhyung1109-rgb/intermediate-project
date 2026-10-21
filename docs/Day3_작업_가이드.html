@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SECOM 반도체 공정 데이터 대시보드 - Day 3 종합 마스터 작업 가이드</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --primary-soft: #eff6ff;
+      --secondary: #0f766e;
+      --secondary-light: #14b8a6;
+      --secondary-soft: #f0fdfa;
+      --accent: #f59e0b;
+      --accent-soft: #fffbeb;
+      --danger: #ef4444;
+      --danger-soft: #fef2f2;
+      --dark: #0f172a;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-width: 310px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      display: flex;
+    }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: #0f172a;
+      color: #94a3b8;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 1px solid #1e293b;
+    }
+
+    .sidebar-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+      color: #f8fafc;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item a:hover, .nav-item.active a {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: #f8fafc;
+    }
+
+    .nav-item .nav-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .nav-item a:hover .nav-num {
+      color: #60a5fa;
+    }
+
+    /* Main Content */
+    main.content {
+      flex: 1;
+      padding: 40px 60px 100px;
+      max-width: 1200px;
+      overflow-x: hidden;
+    }
+
+    .doc-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-category {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      background-color: var(--primary-soft);
+      color: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #fbfcfe;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-pass {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-p0 {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .badge-blue {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-id {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Callout */
+    .callout {
+      border-left: 4px solid var(--primary-light);
+      background-color: var(--primary-soft);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+
+    .callout-warning {
+      border-left-color: var(--accent);
+      background-color: var(--accent-soft);
+    }
+
+    .callout-success {
+      border-left-color: #22c55e;
+      background-color: #f0fdf4;
+    }
+
+    .callout strong {
+      color: var(--dark);
+    }
+
+    /* Code Blocks */
+    pre {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 18px 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      margin: 16px 0 24px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+    }
+
+    p code, td code, li code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .function { color: #38bdf8; }
+    .string { color: #a3e635; }
+    .comment { color: #64748b; font-style: italic; }
+    .number { color: #fb923c; }
+
+    /* Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .mini-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .mini-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mini-card-title {
+      font-weight: 700;
+      color: var(--dark);
+      font-size: 1rem;
+    }
+
+    .mini-card p {
+      font-size: 0.88rem;
+      color: #475569;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar { display: none; }
+      main.content { padding: 24px 20px 60px; }
+      .doc-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">SECOM 데이터 대시보드<br>Day 3 작업 가이드</div>
+      <span class="sidebar-badge">DAY 3 MASTER SPEC</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#sec01"><span class="nav-num">01</span> Day 3 핵심 목표 & 6단계 로드맵</a></li>
+      <li class="nav-item"><a href="#sec02"><span class="nav-num">02</span> 3대 핵심 엔지니어링 원칙</a></li>
+      <li class="nav-item"><a href="#sec03"><span class="nav-num">03</span> Step 1: 공정 시계열 & 불량 변곡점</a></li>
+      <li class="nav-item"><a href="#sec04"><span class="nav-num">04</span> Step 2: 챔버 열화 & 센서 드리프트</a></li>
+      <li class="nav-item"><a href="#sec05"><span class="nav-num">05</span> Step 3: 종합 진단 보고서 (make_report)</a></li>
+      <li class="nav-item"><a href="#sec06"><span class="nav-num">06</span> Step 4: 웹 다운로드 & 8대 용어사전</a></li>
+      <li class="nav-item"><a href="#sec07"><span class="nav-num">07</span> Step 5: C07·C08 예외처리 & 반응형 UI</a></li>
+      <li class="nav-item"><a href="#sec08"><span class="nav-num">08</span> Step 6: 6단계 최종 발표 시연 시나리오</a></li>
+      <li class="nav-item"><a href="#sec09"><span class="nav-num">09</span> C07~C08 완료 검증 대조표</a></li>
+      <li class="nav-item"><a href="#sec10"><span class="nav-num">10</span> 빠른 실행 및 재현 안내</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Header Banner -->
+    <header class="doc-header">
+      <div class="doc-category">
+        <span>⚙️ SEMICONDUCTOR AI DASHBOARD</span>
+      </div>
+      <h1 class="doc-title">Day 3 종합 마스터 작업 가이드</h1>
+      <p style="font-size: 1.1rem; color: #475569; margin-bottom: 16px;">
+        공정 시계열 심층 분석, 챔버 열화(Sensor Drift) 탐색, 종합 진단 리포트 자동 생성(<code>make_report</code>), 원클릭 다운로드 연동 및 C07~C08 프로덕션 안정화 완주 가이드
+      </p>
+      <div class="doc-meta">
+        <div class="meta-item"><span>📅 기준 일차: Day 3 종합</span></div>
+        <div class="meta-item"><span>🎯 챔피언 모델: LightGBM + spw=5.0 + 이상피처 (적발 15건, 71.4%)</span></div>
+        <div class="meta-item"><span>🏆 검증 기준: C07, C08 100% PASS</span></div>
+        <div class="meta-item"><span>🐍 실행 환경: Python 3.10 (DS)</span></div>
+      </div>
+    </header>
+
+    <!-- Section 01 -->
+    <section id="sec01" class="section-card">
+      <h2 class="section-title"><span class="section-num">01</span> Day 3 핵심 목표 & 6단계 로드맵</h2>
+      <p>
+        우리는 Day 1과 Day 2를 통해 590개 센서 정제, 8:2 층화 분리, 고도화 챔피언 모델링(불량 검출 15건 달성), 대화형 시각화(V03~V06) 및 C01~C06 전수 통과를 조기 달성했습니다.<br>
+        <strong>Day 3에서는 기획서의 필수 P0 산출물(보고서 자동 생성 및 CSV 다운로드)을 완성하고, 타임스탬프를 활용한 공정 시계열 및 챔버 열화 분석을 결합하여 실무 발표 완성도를 극대화합니다.</strong>
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 14%;">단계</th>
+              <th style="width: 46%;">주요 작업 내용</th>
+              <th style="width: 40%;">산출물 및 검증 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-id">Step 1</span></td>
+              <td><strong>공정 시간 정보 기반 시계열 심층 분석</strong><br>타임스탬프(2008-07-19 ~ 10-10) 일별/주별 불량 집중 변곡점 및 7일 롤링 이동 불량률 분석</td>
+              <td><code>src/analysis.py</code> (<code>analyze_timeseries_trend()</code>)<br>R05 규칙 고도화</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">Step 2</span></td>
+              <td><strong>챔버 열화 및 센서 드리프트(Sensor Drift) 탐색</strong><br>시간 경과에 따라 중심값/분산이 단조 이동하는 열화 센서 발굴 및 소모품 교체 주기 해석</td>
+              <td><code>src/analysis.py</code> (<code>detect_sensor_drift()</code>)<br>예지보전(PdM) 가치 창출</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">Step 3</span></td>
+              <td><strong>종합 진단 보고서 자동 생성 엔진 (make_report)</strong><br>C01 요약, 추천 규칙, 고정 20% 지표, 1위 샘플 5대 이상 센서, 공정 한계를 담은 Markdown 리포트 자동 생성</td>
+              <td><code>src/analysis.py</code> (<code>make_report()</code>)<br><strong>기획서 Section 09 필수 P0</strong></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">Step 4</span></td>
+              <td><strong>웹 대시보드 다운로드 기능 & 8대 용어사전</strong><br>종합 리포트(.md) 및 시험 예측표(.csv) 다운로드 버튼 연동, 초보자용 핵심 용어 모달 탑재</td>
+              <td><code>app.py</code> 완성형 연동<br>P0 사용자 흐름 완결</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">Step 5</span></td>
+              <td><strong>오류 복원력 & 반응형 UI 검증 (C07, C08)</strong><br>파일 누락/이상치 입력 시 graceful fallback 안내, 모바일/작은 화면 텍스트 겹침 방지</td>
+              <td><code>src/visualization.py</code><br><strong>C07, C08 100% PASS</strong></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">Step 6</span></td>
+              <td><strong>Day 3 마스터 노트북 & 6단계 발표 리허설</strong><br>Day 3 전용 노트북 완주 실행 및 기획서 6단계 발표 시연 시나리오 최종 점검</td>
+              <td><code>notebooks/05_Day3_...ipynb</code><br>심사위원 발표 완벽 대비</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 02 -->
+    <section id="sec02" class="section-card">
+      <h2 class="section-title"><span class="section-num">02</span> 3대 핵심 엔지니어링 원칙</h2>
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">1. 시간 누수(Data Leakage) 차단</span>
+            <span class="badge badge-blue">Security</span>
+          </div>
+          <p>시간 정보(타임스탬프)는 사후 공정 추세 분석에만 사용하며, 8:2 층화 분리 및 Train 전처리 파이프라인의 기준선을 절대 침범하지 않습니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">2. 객관적 드리프트 통계</span>
+            <span class="badge badge-blue">Statistics</span>
+          </div>
+          <p>센서명이 익명화되어 있으므로 임의로 "챔버 온도"나 "가스 압력"으로 단정하지 않고, 시간 순위 상관계수(Drift Score) 기반으로 장비 열화 경향을 기술합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">3. Single Source of Truth</span>
+            <span class="badge badge-blue">Integrity</span>
+          </div>
+          <p>웹 화면에 표출되는 수치(Recall 71.4%, 선정 수 63개, 혼동행렬 314건)와 다운로드되는 보고서의 수치는 동일한 결과 객체로부터 생성되어 단 1건의 오차도 없습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 03 -->
+    <section id="sec03" class="section-card">
+      <h2 class="section-title"><span class="section-num">03</span> Step 1: 공정 시계열 & 불량 집중 변곡점 분석</h2>
+      <p>
+        SECOM 데이터의 타임스탬프(2008년 7월 19일 ~ 10월 10일)를 분석하여 특정 시점(예: 장비 부품 교체 직후나 특정 주차)에 불량이 집중 발생하는 패턴을 진단합니다.
+      </p>
+
+      <pre><code><span class="keyword">def</span> <span class="function">analyze_timeseries_trend</span>(df_labels):
+    <span class="string">"""월별/주별 생산량 및 불량률 시계열 추이 분석"""</span>
+    df = df_labels.copy()
+    df[<span class="string">'timestamp'</span>] = pd.to_datetime(df[<span class="string">'timestamp'</span>])
+    df = df.sort_values(<span class="string">'timestamp'</span>).reset_index(drop=<span class="keyword">True</span>)
+
+    <span class="comment"># 일별 집계 및 7일 롤링 평균 불량률</span>
+    df[<span class="string">'date'</span>] = df[<span class="string">'timestamp'</span>].dt.date
+    daily_summary = df.groupby(<span class="string">'date'</span>).agg(
+        total_wafers=(<span class="string">'label'</span>, <span class="string">'count'</span>),
+        fail_wafers=(<span class="string">'label'</span>, <span class="string">'sum'</span>)
+    ).reset_index()
+    daily_summary[<span class="string">'fail_rate'</span>] = (daily_summary[<span class="string">'fail_wafers'</span>] / daily_summary[<span class="string">'total_wafers'</span>]) * <span class="number">100</span>
+    daily_summary[<span class="string">'rolling_7d_fail_rate'</span>] = daily_summary[<span class="string">'fail_rate'</span>].rolling(window=<span class="number">7</span>, min_periods=<span class="number">1</span>).mean()
+
+    <span class="keyword">return</span> daily_summary</code></pre>
+    </section>
+
+    <!-- Section 04 -->
+    <section id="sec04" class="section-card">
+      <h2 class="section-title"><span class="section-num">04</span> Step 2: 챔버 열화 & 센서 드리프트(Sensor Drift) 탐색</h2>
+      <p>
+        시간 경과에 따라 센서의 중심값(Mean)이나 분산이 서서히 이동하는 현상은 반도체 식각/증착 챔버 내벽의 파티클 누적이나 전극 마모를 의미합니다.
+      </p>
+
+      <pre><code><span class="keyword">def</span> <span class="function">detect_sensor_drift</span>(df_features, df_labels, valid_features, top_n=<span class="number">5</span>):
+    <span class="string">"""시간 축에 따른 피어슨 상관계수를 계산하여 드리프트 민감 센서 선별"""</span>
+    df = pd.merge(df_features[[<span class="string">'sample_id'</span>] + valid_features], df_labels[[<span class="string">'sample_id'</span>, <span class="string">'timestamp'</span>]], on=<span class="string">'sample_id'</span>).sort_values(<span class="string">'timestamp'</span>)
+    time_indices = np.arange(len(df))
+    drift_records = []
+
+    <span class="keyword">for</span> sensor <span class="keyword">in</span> valid_features:
+        series = df[sensor].fillna(df[sensor].median())
+        <span class="keyword">if</span> series.std() > <span class="number">1e-6</span>:
+            corr = np.corrcoef(time_indices, series)[<span class="number">0</span>, <span class="number">1</span>]
+            drift_records.append({
+                <span class="string">'sensor_id'</span>: sensor,
+                <span class="string">'drift_score'</span>: abs(corr),
+                <span class="string">'direction'</span>: <span class="string">'상승 드리프트 ⬆️'</span> <span class="keyword">if</span> corr > <span class="number">0</span> <span class="keyword">else</span> <span class="string">'하강 드리프트 ⬇️'</span>
+            })
+
+    <span class="keyword">return</span> pd.DataFrame(drift_records).sort_values(by=<span class="string">'drift_score'</span>, ascending=<span class="keyword">False</span>).head(top_n)</code></pre>
+    </section>
+
+    <!-- Section 05 -->
+    <section id="sec05" class="section-card">
+      <h2 class="section-title"><span class="section-num">05</span> Step 3: 종합 진단 보고서 자동 생성 엔진 (make_report)</h2>
+      <p>
+        기획서 Section 09의 필수 산출물인 <code>make_report()</code> 함수는 시스템의 모든 핵심 분석 결과(데이터 품질, R01~R06 추천 이유, 상위 20% 지표, 1위 샘플 이상 원인)를 하나의 정형화된 마크다운 문서로 자동 조립합니다.
+      </p>
+
+      <div class="callout callout-success">
+        <strong>📋 기획서 Section 09 필수 포함 필드:</strong><br>
+        1. 데이터 및 모델 버전 정보 (Day 3 Production)<br>
+        2. 원본 요약(1,567건, 결측 41,951개, 불량 104개)<br>
+        3. R01~R06 분석 추천 규칙 판정 근거<br>
+        4. 상위 20% 고정 평가 성과 (검출 15건, Recall 71.4%, Precision 23.8%)<br>
+        5. 선택 고위험 샘플의 5대 이상 센서 대조표 및 공정 한계점
+      </div>
+    </section>
+
+    <!-- Section 06 -->
+    <section id="sec06" class="section-card">
+      <h2 class="section-title"><span class="section-num">06</span> Step 4: 웹 대시보드 다운로드 & 8대 용어사전</h2>
+      <p>
+        Streamlit의 <code>st.download_button</code>을 활용하여 클릭 한 번으로 보고서와 데이터를 내려받고, 비전공자도 시스템을 쉽게 이해할 수 있도록 8대 용어사전 툴팁을 추가합니다.
+      </p>
+
+      <pre><code><span class="comment"># S05 모델 성능 평가 섹션 하단 다운로드 구역</span>
+st.markdown(<span class="string">"---"</span>)
+st.subheader(<span class="string">"📥 [P0] 진단 보고서 및 예측 데이터 다운로드"</span>)
+
+col1, col2 = st.columns(<span class="number">2</span>)
+<span class="keyword">with</span> col1:
+    report_md = make_report(summary, m20, cm_dict, df_ref_top1)
+    st.download_button(
+        label=<span class="string">"📄 종합 진단 보고서 다운로드 (Markdown .md)"</span>,
+        data=report_md,
+        file_name=<span class="string">"SECOM_공정_품질_종합_진단_보고서.md"</span>,
+        mime=<span class="string">"text/markdown"</span>,
+        use_container_width=<span class="keyword">True</span>
+    )
+<span class="keyword">with</span> col2:
+    csv_bytes = df_predictions.to_csv(index=<span class="keyword">False</span>).encode(<span class="string">"utf-8-sig"</span>)
+    st.download_button(
+        label=<span class="string">"📊 위험도 순위 시험 예측표 다운로드 (CSV .csv)"</span>,
+        data=csv_bytes,
+        file_name=<span class="string">"SECOM_위험순위_예측결과_314건.csv"</span>,
+        mime=<span class="string">"text/csv"</span>,
+        use_container_width=<span class="keyword">True</span>
+    )</code></pre>
+    </section>
+
+    <!-- Section 07 -->
+    <section id="sec07" class="section-card">
+      <h2 class="section-title"><span class="section-num">07</span> Step 5: C07·C08 예외처리 & 반응형 UI 검증</h2>
+      <p>
+        기획서 C07(오류 복원력)과 C08(반응형 레이아웃)을 완벽히 만족하도록 에러 핸들링과 UI를 방어적으로 보강합니다.
+      </p>
+      <ul>
+        <li><strong>C07-1 (파일 부재 Fallback)</strong>: 아티팩트 파일이 없을 경우 강제 크래시 대신 재학습 유도 메시지 표출</li>
+        <li><strong>C07-2 (샘플 ID 경계 검증)</strong>: 슬라이더나 셀렉트박스에 잘못된 ID가 들어와도 기본 1위 샘플로 안전 복구</li>
+        <li><strong>C08-1 (반응형 차트)</strong>: 모든 Plotly 차트에 <code>autosize=True</code> 및 Streamlit <code>use_container_width=True</code> 적용</li>
+        <li><strong>C08-2 (한글 깨짐 방지)</strong>: CSV 다운로드 시 <code>utf-8-sig</code> 인코딩을 적용하여 Excel에서도 한글 무결성 보장</li>
+      </ul>
+    </section>
+
+    <!-- Section 08 -->
+    <section id="sec08" class="section-card">
+      <h2 class="section-title"><span class="section-num">08</span> Step 6: 6단계 최종 발표 시연 시나리오</h2>
+      <div class="callout callout-warning">
+        <strong>🎙️ 기획서 Section 13 발표 시연 6단계 권장 순서:</strong><br>
+        1. <strong>불균형/결측 확인</strong> (S01): 불량률 6.6%와 심각한 왜도 센서들에 대한 중앙값 대입 당위성 설명<br>
+        2. <strong>추천 이유 확인</strong> (S02): 6대 추천 규칙(R01~R06) 및 시간대별 불량 변곡점 확인<br>
+        3. <strong>센서 그래프 탐색</strong> (S03): 유효 232개 센서의 정상/불량 밀도 및 박스플롯 대조<br>
+        4. <strong>위험 샘플 정상 비교</strong> (S04): 1위 고위험 샘플의 5대 이상 센서 및 5~95 백분위 이탈 확인<br>
+        5. <strong>검토 비율 성과</strong> (S05): 상위 20% 우선 검사로 <strong>불량 15건(71.4%)을 적발하여 유출 위험을 50% 절감한 챔피언 모델 성과</strong> 강조<br>
+        6. <strong>보고서 다운로드</strong>: 종합 진단 마크다운 보고서와 예측 CSV 원클릭 다운로드 시연으로 현업 완성도 입증
+      </div>
+    </section>
+
+    <!-- Section 09 -->
+    <section id="sec09" class="section-card">
+      <h2 class="section-title"><span class="section-num">09</span> C07 ~ C08 완료 검증 대조표</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 15%;">검증 코드</th>
+              <th style="width: 30%;">검증 항목</th>
+              <th style="width: 40%;">기획서 명세 기준</th>
+              <th style="width: 15%;">판정 목표</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-id">C07-1</span></td>
+              <td>파일 부재 예외 처리</td>
+              <td>필수 파일 누락 시 크래시 없이 친절한 안내 표출</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C07-2</span></td>
+              <td>샘플 ID 범위 검증</td>
+              <td>유효하지 않은 ID 입력 시 기본 1위 샘플로 Fallback</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C07-3</span></td>
+              <td>재실행 일관성</td>
+              <td>대시보드 새로고침 시에도 동일한 순위와 지표 유지</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C08-1</span></td>
+              <td>반응형 차트 레이아웃</td>
+              <td>브라우저 창 크기 변경 시 차트 자동 리사이징</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C08-2</span></td>
+              <td>텍스트 겹침 방지</td>
+              <td>모바일/작은 화면에서 메트릭 라벨 겹침 방지</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-id">C08-3</span></td>
+              <td>다운로드 무결성</td>
+              <td>Excel에서 CSV를 열어도 한글 깨짐 없는 무결성</td>
+              <td><span class="badge badge-pass">PASS (100%)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 10 -->
+    <section id="sec10" class="section-card">
+      <h2 class="section-title"><span class="section-num">10</span> 빠른 실행 및 재현 안내</h2>
+      <pre><code><span class="comment"># 1. 가상환경 활성화</span>
+conda activate DS
+
+<span class="comment"># 2. Day 3 핵심 시계열/리포트 분석 모듈 단위 검증</span>
+& "C:\ProgramData\miniconda3\envs\DS\python.exe" -c "
+from src.analysis import analyze_timeseries_trend, detect_sensor_drift, make_report
+print('Day 3 core functions verified successfully!')
+"
+
+<span class="comment"># 3. Streamlit 대시보드 최종 실행</span>
+streamlit run app.py</code></pre>
+    </section>
+
+  </main>
+
+</body>
+</html>

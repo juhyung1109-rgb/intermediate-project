@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SECOM 반도체 공정 데이터 대시보드 - Day 3 심층 고도화 전략 가이드</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --primary-soft: #eff6ff;
+      --secondary: #0f766e;
+      --secondary-light: #0d9488;
+      --secondary-soft: #f0fdfa;
+      --accent: #d97706;
+      --accent-soft: #fffbeb;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --purple: #7c3aed;
+      --purple-soft: #f5f3ff;
+      --dark: #0f172a;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      display: flex;
+    }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: #0f172a;
+      color: #94a3b8;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 1px solid #1e293b;
+    }
+
+    .sidebar-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+      color: #f8fafc;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background-color: rgba(124, 58, 237, 0.2);
+      color: #a78bfa;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item a:hover, .nav-item.active a {
+      background-color: rgba(124, 58, 237, 0.15);
+      color: #f8fafc;
+    }
+
+    .nav-item .nav-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .nav-item a:hover .nav-num {
+      color: #a78bfa;
+    }
+
+    /* Main Content */
+    main.content {
+      flex: 1;
+      padding: 40px 60px 100px;
+      max-width: 1200px;
+      overflow-x: hidden;
+    }
+
+    .doc-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-category {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--purple);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      background-color: var(--purple-soft);
+      color: var(--purple);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #fbfcfe;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-pass {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-p0 {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .badge-blue {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-purple {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #e9d5ff;
+    }
+
+    .badge-id {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Callout */
+    .callout {
+      border-left: 4px solid var(--primary-light);
+      background-color: var(--primary-soft);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+
+    .callout-purple {
+      border-left-color: var(--purple);
+      background-color: var(--purple-soft);
+    }
+
+    .callout-warning {
+      border-left-color: var(--accent);
+      background-color: var(--accent-soft);
+    }
+
+    .callout-success {
+      border-left-color: #22c55e;
+      background-color: #f0fdf4;
+    }
+
+    .callout strong {
+      color: var(--dark);
+    }
+
+    /* Code Blocks */
+    pre {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 18px 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      margin: 16px 0 24px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+    }
+
+    p code, td code, li code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .function { color: #38bdf8; }
+    .string { color: #a3e635; }
+    .comment { color: #64748b; font-style: italic; }
+    .number { color: #fb923c; }
+
+    /* Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .mini-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .mini-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mini-card-title {
+      font-weight: 700;
+      color: var(--dark);
+      font-size: 1rem;
+    }
+
+    .mini-card p {
+      font-size: 0.88rem;
+      color: #475569;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar { display: none; }
+      main.content { padding: 24px 20px 60px; }
+      .doc-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">SECOM 데이터 대시보드<br>Day 3 심층 고도화 전략</div>
+      <span class="sidebar-badge">ADVANCED STRATEGY SPEC</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#strat01"><span class="nav-num">01</span> 전략 개요 & 차별화 가치</a></li>
+      <li class="nav-item"><a href="#strat02"><span class="nav-num">02</span> 전략 1: 공정 시계열 안정성 분석</a></li>
+      <li class="nav-item"><a href="#strat03"><span class="nav-num">03</span> 전략 2: 챔버 열화 & 센서 드리프트</a></li>
+      <li class="nav-item"><a href="#strat04"><span class="nav-num">04</span> 전략 3: 시계열 피처 엔지니어링</a></li>
+      <li class="nav-item"><a href="#strat05"><span class="nav-num">05</span> 전략 4: 투트랙 종합 진단 리포팅</a></li>
+      <li class="nav-item"><a href="#strat06"><span class="nav-num">06</span> 전략 5: 프로덕션 견고성 & C07·C08</a></li>
+      <li class="nav-item"><a href="#strat07"><span class="nav-num">07</span> 전략 6: 심사위원 Q&A 대응 논리</a></li>
+      <li class="nav-item"><a href="#strat08"><span class="nav-num">08</span> 주피터 노트북 연계 가이드</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Header Banner -->
+    <header class="doc-header">
+      <div class="doc-category">
+        <span>🚀 INDUSTRIAL AI ADVANCED STRATEGY BLUEPRINT</span>
+      </div>
+      <h1 class="doc-title">Day 3 공정 시계열·센서 드리프트·리포팅<br>심층 고도화 전략 가이드</h1>
+      <p style="font-size: 1.1rem; color: #475569; margin-bottom: 16px;">
+        단순한 모델링 완성을 넘어 실제 반도체 팹(Fab) 양산 현장에서 설비 보전 엔지니어와 품질 관리자가 즉시 활용할 수 있는 차별화된 5대 고도화 기술 전략을 제시합니다.
+      </p>
+      <div class="doc-meta">
+        <div class="meta-item"><span>📅 수립 일차: Day 3 종합</span></div>
+        <div class="meta-item"><span>⚙️ 도메인: 반도체 제조 공정 예지보전(PdM) & 수율 예측</span></div>
+        <div class="meta-item"><span>🏆 핵심 성과: 불량 15건 적발 유지 + 시간 기반 공정 결함 사전 진단</span></div>
+      </div>
+    </header>
+
+    <!-- Strategy 01 -->
+    <section id="strat01" class="section-card">
+      <h2 class="section-title"><span class="section-num">01</span> 전략 개요 & 차별화 가치</h2>
+      <p>
+        Day 2까지의 성과가 <strong>"이미 생산된 웨이퍼 중 불량 위험도가 높은 20%를 골라내어 불량 15개(71.4%)를 검거하는 사후 탐지(Inspection)"</strong>였다면, 
+        <strong>Day 3의 고도화 전략은 "시간에 따른 공정 흐름(Flow)과 장비 열화(Degradation)를 분석하여 불량이 발생하기 직전의 징후를 조기에 포착하는 사전 예방(Early Warning)"</strong>으로 도약합니다.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">고도화 전략 축</th>
+              <th style="width: 45%;">핵심 엔지니어링 접근법</th>
+              <th style="width: 30%;">현업 비즈니스 임팩트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. 시계열 공정 안정성</strong></td>
+              <td>7일/14일 이동 평균 불량률, 일별/주별 생산 주기성, 공정 변곡점 탐색</td>
+              <td>특정 장비 점검 주기 및 교대조/배치 불량 원인 규명</td>
+            </tr>
+            <tr>
+              <td><strong>2. 챔버 센서 드리프트</strong></td>
+              <td>시간 진행에 따른 센서값 점진적 단조 이동(Drift Score) 정량화</td>
+              <td>소모품(전극, 노즐) 마모 및 챔버 클리닝 주기(PdM) 제안</td>
+            </tr>
+            <tr>
+              <td><strong>3. 시계열 피처 모델링</strong></td>
+              <td>누적 생산 순번, 최근 N개 불량 밀도, 롤링 편차를 파생 피처로 검토</td>
+              <td>시간 누수 없는 순차적 이상 감지 가능성 검증</td>
+            </tr>
+            <tr>
+              <td><strong>4. 투트랙 리포트 엔진</strong></td>
+              <td><code>make_report()</code>를 엔지니어 상세 기술표 + 경영진 요약 KPI로 이원화</td>
+              <td>실제 공정 결재 라인에 즉시 보고 가능한 무결성 문서</td>
+            </tr>
+            <tr>
+              <td><strong>5. 프로덕션 안정화</strong></td>
+              <td>C07 (예외 처리 및 Fallback) & C08 (반응형 뷰포트 및 UTF-8-SIG)</td>
+              <td>어떤 비정상 입력이나 저해상도 환경에서도 앱 무결성 보장</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Strategy 02 -->
+    <section id="strat02" class="section-card">
+      <h2 class="section-title"><span class="section-num">02</span> 전략 1: 공정 시계열 안정성 & 불량 변곡점 심층 분석</h2>
+      <p>
+        SECOM 데이터는 <strong>2008년 7월 19일부터 2008년 10월 10일까지</strong> 약 3개월간의 연속 측정치입니다. 
+        단순히 전체 불량률 6.6%로 퉁치는 것이 아니라, 시간 경과에 따른 불량률의 국소적 급증(Spike) 구간을 정밀 추적합니다.
+      </p>
+
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">변곡점 A: 8월 중순 일시적 피크</span>
+            <span class="badge badge-purple">Batch Issue</span>
+          </div>
+          <p>특정 주차(34주차)에 일일 생산량 감소와 함께 불량률이 일시적으로 15% 이상 치솟는 구간을 포착하여 원인을 진단합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">변곡점 B: 9월 이후 안정화</span>
+            <span class="badge badge-pass">PM Event</span>
+          </div>
+          <p>9월 중순 이후 전체 센서 분산이 줄어들며 불량률이 3% 미만으로 급감하는 예방 정비(PM, Preventive Maintenance) 효과를 확인합니다.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-purple">
+        <strong>💡 R05 추천 규칙 고도화 수식:</strong><br>
+        월별 불량률 편차 $\Delta = \max(\text{Rate}_{month}) - \min(\text{Rate}_{month}) > 5\%p$ 조건에 따라, 
+        단순 월별 비교를 넘어 <strong>7일 롤링 윈도우 이동 평균 불량률(Rolling 7-day Fail Rate)</strong>을 산출하여 단기적 공정 쇼크를 조기 경보합니다.
+      </div>
+    </section>
+
+    <!-- Strategy 03 -->
+    <section id="strat03" class="section-card">
+      <h2 class="section-title"><span class="section-num">03</span> 전략 2: 챔버 열화(Degradation) & 센서 드리프트 정량화</h2>
+      <p>
+        반도체 화학기상증착(CVD) 및 건식 식각(Dry Etch) 공정에서는 웨이퍼 가공 횟수가 누적될수록 다음과 같은 물리적 현상이 발생합니다:
+      </p>
+      <ul style="margin-left: 20px; margin-bottom: 16px; color: #475569;">
+        <li><strong>챔버 내벽 파티클 증착</strong>: 공정 가스 반응 부산물이 챔버 벽면에 점진적으로 쌓여 RF 임피던스 변화 유발</li>
+        <li><strong>샤워헤드 / 가스 인젝터 노즐 오염</strong>: 가스 분사 균일도가 서서히 저하되어 웨이퍼 가장자리 막 두께 불균일 발생</li>
+        <li><strong>포커스 링 / 전극 마모</strong>: 플라즈마 충돌로 전극 소모품이 깎여나가 공정 전압 중심값이 단조 증가/감소</li>
+      </ul>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 15%;">센서 ID</th>
+              <th style="width: 18%;">드리프트 지수 & 방향</th>
+              <th style="width: 15%;">누적 이동량 (Sigma)</th>
+              <th style="width: 22%;">초기값 ➔ 후기값 평균</th>
+              <th style="width: 30%;">공학적 물리 해석 및 권고 조치</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>feature_29</code></td>
+              <td><span class="badge badge-purple">확실한 상승 ⬆️</span></td>
+              <td><strong>+2.04σ</strong></td>
+              <td>65.296 ➔ 72.247 (+10.6%)</td>
+              <td>CVD/증착 챔버 내벽 파티클 코팅 누적 ➔ 챔버 클리닝 필요</td>
+            </tr>
+            <tr>
+              <td><code>feature_543</code></td>
+              <td><span class="badge badge-purple">확실한 상승 ⬆️</span></td>
+              <td><strong>+1.78σ</strong></td>
+              <td>0.1097 ➔ 0.1139 (+3.9%)</td>
+              <td>가열 히터 저항 증가 및 챔버 배압 상승 ➔ 배기 밸브 점검</td>
+            </tr>
+            <tr>
+              <td><code>feature_170</code></td>
+              <td><span class="badge badge-purple">확실한 상승 ⬆️</span></td>
+              <td><strong>+1.53σ</strong></td>
+              <td>0.2830 ➔ 0.4766 (+68.4%)</td>
+              <td>5구간 100% 연속 단조 증가 ➔ 센서 표면 감도 열화 점검</td>
+            </tr>
+            <tr>
+              <td><code>feature_104</code></td>
+              <td><span class="badge badge-p0">확실한 하강 ⬇️</span></td>
+              <td><strong>-1.73σ</strong></td>
+              <td>-0.0064 ➔ -0.0113 (-74.7%)</td>
+              <td>Dry Etch 플라즈마 전극 마모 ➔ RF 전송 효율 저하 점검</td>
+            </tr>
+            <tr>
+              <td><code>feature_80</code></td>
+              <td><span class="badge badge-p0">확실한 하강 ⬇️</span></td>
+              <td><strong>-1.71σ</strong></td>
+              <td>+0.0283 ➔ -0.0015 (-105.3%)</td>
+              <td>포커스 링 침식으로 영점 관통 하강 ➔ 소모품 즉시 교체</td>
+            </tr>
+            <tr>
+              <td><code>feature_60</code></td>
+              <td><span class="badge badge-p0">확실한 하강 ⬇️</span></td>
+              <td><strong>-1.49σ</strong></td>
+              <td>12.607 ➔ 0.1150 (-99.1%)</td>
+              <td>초기 대비 99% 수직 폭락 ➔ 전력 공급 모듈 선제적 교체</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; padding: 14px 18px; background: #F8FAFC; border-left: 4px solid #6366F1; border-radius: 6px;">
+        <strong style="color: #1E293B;">💡 왜 단순 피어슨 상관계수(|r|) 대신 '3대 다면 통계 모델'을 적용했는가?</strong><br>
+        <span style="font-size: 0.92rem; color: #475569;">
+          단순 피어슨 $|r|$만 적용하면 <code>feature_79</code>처럼 표준편차가 0.048로 매우 작고 후반부에 결측치 중앙값 대체가 몰린 센서가 시각적으로는 '수평선'임에도 순위 상위에 잡히는 스케일 착시가 발생합니다. 본 시스템은 <strong>① 켄달 타우($\tau$) 비모수 단조성, ② 표준화 누적 기울기($\Delta \sigma \ge 1.0\sigma$), ③ 초기-후기 기저 이동량($\Delta \mu / \sigma \ge 0.70\sigma$)</strong>을 결합한 <code>Drift Index</code>를 도입하여 수평 노이즈를 완전 제거하고 확연한 물리적 드리프트 센서만을 정확히 판별합니다.
+        </span>
+      </div>
+    </section>
+
+
+    <!-- Strategy 04 -->
+    <section id="strat04" class="section-card">
+      <h2 class="section-title"><span class="section-num">04</span> 전략 3: 시계열 파생 피처 엔지니어링 및 모델 영향도 검증</h2>
+      <p>
+        시간 정보로부터 파생 가능한 지표들을 머신러닝 피처로 추가했을 때의 효과를 엄격히 검증합니다:
+      </p>
+
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">Feature 1: Cumulative Sequence</span>
+            <span class="badge badge-blue">Fatigue</span>
+          </div>
+          <p>시간순 누적 웨이퍼 생산 번호 (0 ~ 1,566). 장비의 총 누적 가동 시간 및 장기 열화 피로도를 대변합니다.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header">
+            <span class="mini-card-title">Feature 2: Recent Defect Density</span>
+            <span class="badge badge-p0">Batch Risk</span>
+          </div>
+          <p>직전 5개 웨이퍼 중 불량 발생 개수. 공정이 현재 불안정 배치(Unstable Batch) 구간에 진입했는지 실시간 반영합니다.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <strong>⚠️ 시간 누수(Data Leakage) 방지 검증 원칙:</strong><br>
+        실전 배포 시에는 '미래의 불량'을 알 수 없으므로, 피처 계산 시 <strong>오직 과거 $t-1$ 시점까지의 측정치만을 윈도우에 포함</strong>해야 합니다. 
+        검증 결과, 현재의 <strong>Day 2 챔피언 모델(15건 적발, Recall 71.4%)</strong>이 순수 센서 결함 감지에 있어 가장 강건(Robust)하며, 시간 피처는 사후 알람용 보조 지표로 활용할 때 과적합이 없음을 입증합니다.
+      </div>
+    </section>
+
+    <!-- Strategy 05 -->
+    <section id="strat05" class="section-card">
+      <h2 class="section-title"><span class="section-num">05</span> 전략 4: 투트랙 종합 진단 리포팅 (`make_report`)</h2>
+      <p>
+        기획서 Section 09의 필수 함수 <code>make_report()</code>는 시스템의 모든 산출물을 결합하여 <strong>결재 라인별 맞춤형 리포트</strong>를 단일 마크다운 문서로 자동 생성합니다.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">보고서 섹션</th>
+              <th style="width: 45%;">포함 핵심 데이터</th>
+              <th style="width: 30%;">주요 독자 및 활용처</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Section 1: 요약 KPI</strong></td>
+              <td>총 웨이퍼 수, 불량률(6.6%), 상위 20% 불량 적발 성과 (15건, Recall 71.4%)</td>
+              <td>경영진 / 공장장 / 품질 총괄 임원</td>
+            </tr>
+            <tr>
+              <td><strong>Section 2: 규칙 진단</strong></td>
+              <td>R01(결측), R02(상수), R03(불균형), R05(시계열 편차) 발화 사유</td>
+              <td>데이터 사이언티스트 / 품질 기획팀</td>
+            </tr>
+            <tr>
+              <td><strong>Section 3: 장비 정밀 진단</strong></td>
+              <td>1위 위험 웨이퍼의 5대 이상 센서, Z-Score 이탈도, 드리프트 센서</td>
+              <td>현장 설비 보전 및 챔버 엔지니어</td>
+            </tr>
+            <tr>
+              <td><strong>Section 4: 한계 및 권고</strong></td>
+              <td>센서 익명화에 따른 해석 주의점, 3-시그마 정상 백분위 한계 명시</td>
+              <td>감사 대응 및 공정 표준화 보고서</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Strategy 06 -->
+    <section id="strat06" class="section-card">
+      <h2 class="section-title"><span class="section-num">06</span> 전략 5: 프로덕션 견고성 & C07·C08 완주 전략</h2>
+      <p>
+        실제 공장 생산 라인에서 대시보드가 중단 없이 동작하도록 방어적 프로그래밍을 적용합니다:
+      </p>
+      <ul>
+        <li><strong>C07 (예외 처리 & Graceful Fallback)</strong>:
+          <ul>
+            <li>아티팩트 모델 파일이 삭제되거나 경로가 깨져도 크래시 없이 직관적인 복구 배너 표출</li>
+            <li>사용자가 브라우저 URL 파라미터나 셀렉트박스에 존재하지 않는 `sample_id`를 입력해도 1위 고위험 샘플로 자동 복원</li>
+          </ul>
+        </li>
+        <li><strong>C08 (다양한 환경 지원 & 무결성)</strong>:
+          <ul>
+            <li>스마트폰, 태블릿, 4K 고해상도 모니터 어디서나 차트가 자동 리사이징(`autosize=True`)되도록 Plotly 및 Streamlit CSS 최적화</li>
+            <li>다운로드되는 CSV에 <code>utf-8-sig</code> (BOM)를 적용하여 현업 엔지니어가 한국어 Excel에서 바로 더블클릭해도 글자 깨짐 현상 원천 차단</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Strategy 07 -->
+    <section id="strat07" class="section-card">
+      <h2 class="section-title"><span class="section-num">07</span> 전략 6: 심사위원 Q&A 대응 논리 (발표 방어)</h2>
+      
+      <div class="callout callout-purple">
+        <strong>Q. "시계열 데이터를 머신러닝 훈련 피처로 직접 쓰지 않고 사후 분석으로 푼 이유는 무엇인가요?"</strong><br>
+        <strong>A.</strong> "반도체 공정에서 타임스탬프는 장비 열화와 배치 변화를 보여주는 매우 유용한 정보이지만, 미래 시점 데이터가 과거 모델 학습에 섞이는 <strong>데이터 누수(Data Leakage)의 가장 큰 주범</strong>입니다. 저희는 8:2 층화 분리 기준선(314건 시험 데이터)의 객관성을 100% 지키기 위해, 센서 기반 챔피언 모델(15건 적발)을 중심에 두고, 시간 축은 <strong>장비 드리프트 모니터링 및 배치 트러블 조기 경보를 위한 '사후 진단 인텔리전스 레이어'로 이원화</strong>하여 완벽한 신뢰성을 확보했습니다."
+      </div>
+
+      <div class="callout callout-purple">
+        <strong>Q. "센서 드리프트가 발생했을 때 현업에서는 어떻게 조치하나요?"</strong><br>
+        <strong>A.</strong> "드리프트 스코어 상위 센서(`feature_59`, `feature_124` 등)의 Z-Score가 3-시그마를 돌파하면, 라인을 즉시 멈추는 것이 아니라 <strong>'예방 정비(PM) 알림'</strong>을 발송합니다. 이를 통해 챔버 클리닝, 가스 노즐 세정, 전극 마모 점검을 비가동 시간에 선제적으로 수행하여 돌발 셧다운을 방지합니다."
+      </div>
+    </section>
+
+    <!-- Strategy 08 -->
+    <section id="strat08" class="section-card">
+      <h2 class="section-title"><span class="section-num">08</span> 주피터 노트북 연계 가이드</h2>
+      <p>
+        본 고도화 전략의 모든 수식, 데이터 집계 및 시각화는 신규 주피터 노트북인 
+        <code>notebooks/05_Day3_시계열분석_센서드리프트_리포트엔진.ipynb</code>에서 대화형으로 단계별 실행하고 시각적으로 검증할 수 있도록 설계되었습니다.
+      </p>
+      <div class="callout callout-success">
+        <strong>🚀 다음 실행 단계:</strong><br>
+        VS Code에서 <code>notebooks/05_Day3_시계열분석_센서드리프트_리포트엔진.ipynb</code>를 열고, 
+        커널을 <strong>Python (DS)</strong>로 선택하여 각 셀의 코드와 상세 설명을 함께 읽으며 실행하시면 됩니다!
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

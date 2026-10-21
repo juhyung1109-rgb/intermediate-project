@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEMI-GUARD: 실시간 연동 웹앱 및 Cloud Run 구축 작업 가이드</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --primary-soft: #eff6ff;
+      --secondary: #0f766e;
+      --secondary-light: #14b8a6;
+      --secondary-soft: #f0fdfa;
+      --accent: #f59e0b;
+      --accent-soft: #fffbeb;
+      --danger: #ef4444;
+      --danger-soft: #fef2f2;
+      --dark: #0b1120;
+      --dark-card: #131d31;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-width: 320px;
+      --neon-cyan: #06b6d4;
+      --neon-emerald: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.68;
+      display: flex;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: var(--dark);
+      color: #94a3b8;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 1px solid #1e293b;
+    }
+
+    .sidebar-header {
+      padding-bottom: 18px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 18px;
+    }
+
+    .sidebar-title {
+      color: #f8fafc;
+      font-size: 1.02rem;
+      font-weight: 700;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background-color: rgba(6, 182, 212, 0.2);
+      color: var(--neon-cyan);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item a:hover {
+      background-color: #1e293b;
+      color: #f8fafc;
+      transform: translateX(3px);
+    }
+
+    .nav-item.active a {
+      background-color: var(--primary-light);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    main.main-content {
+      flex: 1;
+      max-width: 1100px;
+      padding: 40px 50px 80px 50px;
+      overflow-x: hidden;
+    }
+
+    header.doc-header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .doc-badge-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-primary { background: var(--primary-soft); color: var(--primary); }
+    .badge-secondary { background: var(--secondary-soft); color: var(--secondary); }
+    .badge-accent { background: var(--accent-soft); color: #b45309; }
+    .badge-cyan { background: #ecfeff; color: #0891b2; }
+
+    h1.doc-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    p.doc-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Section Styles */
+    section.guide-section {
+      margin-bottom: 52px;
+      scroll-margin-top: 30px;
+    }
+
+    h2.section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3.subsection-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 24px 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* Alert / Callout Box */
+    .callout {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .callout-info { border-color: var(--primary-light); background-color: var(--primary-soft); color: #1e40af; }
+    .callout-success { border-color: var(--neon-emerald); background-color: #ecfdf5; color: #065f46; }
+    .callout-warning { border-color: var(--accent); background-color: var(--accent-soft); color: #92400e; }
+    .callout-cyan { border-color: var(--neon-cyan); background-color: #ecfeff; color: #155e75; }
+
+    /* Card Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Architecture Block */
+    .arch-container {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 24px;
+      color: #e2e8f0;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      border: 1px solid #1e293b;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    table.data-table th, table.data-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    table.data-table th {
+      background-color: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+    }
+    table.data-table tr:hover { background-color: #f8fafc; }
+
+    /* Code Blocks */
+    pre.code-block {
+      background: #0b1120;
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #1e293b;
+      line-height: 1.55;
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      padding: 2px 6px;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      border-radius: 4px;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* Step Pill */
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      color: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+    .check-icon {
+      color: var(--neon-emerald);
+      font-weight: bold;
+      font-size: 1.1rem;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span>⚙️ SEMI-GUARD</span>
+      </div>
+      <div class="sidebar-badge">웹앱 & Cloud Run 가이드</div>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active"><a href="#overview">📌 1. 시스템 개요 & 아키텍처</a></li>
+      <li class="nav-item"><a href="#roles">👥 2. 역할 분리 (직원 vs 관리자)</a></li>
+      <li class="nav-item"><a href="#missions">🎯 3. 2대 핵심 공정 미션</a></li>
+      <li class="nav-item"><a href="#chatbot">🤖 4. 보안 폐쇄형 LLM Wiki 챗봇</a></li>
+      <li class="nav-item"><a href="#simulator">🧪 5. 신규 데이터 배치 시뮬레이터</a></li>
+      <li class="nav-item"><a href="#cloudrun">☁️ 6. Cloud Run 서버 구축 & 배포</a></li>
+      <li class="nav-item"><a href="#pwa-qr">📱 7. PWA & 현장 QR 코드 연동</a></li>
+      <li class="nav-item"><a href="#assets">📥 8. 보고서/차트 다운로드 센터</a></li>
+      <li class="nav-item"><a href="#checklist">✅ 9. 최종 구현 체크리스트</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="doc-header">
+      <div class="doc-badge-group">
+        <span class="badge badge-primary">실시간 연동 웹앱</span>
+        <span class="badge badge-secondary">Firebase Auth</span>
+        <span class="badge badge-cyan">Google Cloud Run</span>
+        <span class="badge badge-accent">PWA & QR Code</span>
+      </div>
+      <h1 class="doc-title">SEMI-GUARD: 실시간 연동 웹앱 및 Cloud Run 구축 작업 가이드</h1>
+      <p class="doc-subtitle">
+        반도체 공정(SECOM) 1~3일차 분석 산출물을 100% 연동하여, <b>직원/관리자 역할 분리</b>, <b>2대 핵심 공정 미션(빠른 불량 센서 진단 & 노후 장비 드리프트 점검)</b>, <b>사내 LLM Wiki 보안 폐쇄형 챗봇</b>, <b>신규 데이터 실시간 배치 시뮬레이터</b> 및 <b>Google Cloud Run 컨테이너 배포</b>를 완성하는 종합 실행 매뉴얼입니다.
+      </p>
+    </header>
+
+    <!-- 1. 개요 & 아키텍처 -->
+    <section id="overview" class="guide-section">
+      <h2 class="section-title">📌 1. 시스템 개요 & 아키텍처 (Architecture Overview)</h2>
+      <p>
+        본 시스템은 머신러닝 모델의 통계 수치에 머무르지 않고, 반도체 제조 팹(Fab) 현장에서 엔지니어와 공정 책임자가 매일 실무에 사용하는 <b>반응형 실시간 웹 관제 플랫폼</b>입니다.
+      </p>
+
+      <div class="arch-container">
+[📱 현장 태블릿 / 스마트폰 (PWA + QR)]        [💻 공정 관제실 PC (Web Browser)]
+                 │                                      │
+                 └──────────────────┬───────────────────┘
+                                    ▼
+                     [🔐 Firebase Authentication]
+                        - 직원용 (Engineer) vs 관리자용 (Admin)
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   🌐 SEMI-GUARD 웹 프론트엔드 (PWA)                     │
+│  ┌─────────────────────────┐  ┌─────────────────────────────────────┐  │
+│  │ 👷 [직원 전용 화면]      │  │ 👨‍💼 [관리자 전용 화면]               │  │
+│  │ ① 초고속 불량 센서 진단  │  │ ① 공정 수율 & 7일 롤링 시계열 추이 │  │
+│  │ ② 챔버 드리프트 일상점검│  │ ② 20% 우선검사 모델 성능(Recall 71%)│  │
+│  └─────────────────────────┘  │ ③ 설비 PM 총괄 & 산출물 다운로드   │  │
+│                                └─────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │ 🤖 [보안 폐쇄형 공정 QA 챗봇] (오로지 사내 LLM Wiki 기반으로만 응답)│  │
+│  │ 🧪 [신규 데이터 실시간 배치 시뮬레이터] (미지의 CSV 검증 파이프라인)│  │
+│  │ 📥 [보고서 & 고해상도 차트 원클릭 다운로드 센터]                   │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+                                    ▲ (REST API 통신)
+                                    │
+┌────────────────────────────────────────────────────────────────────────┐
+│               ☁️ Google Cloud Run 백엔드 컨테이너 (FastAPI)             │
+│  1. 🧠 LLM Wiki 지식 검색 엔진 (공정 진단 보고서, 트러블슈팅 이력)       │
+│  2. ⚙️ 실시간 전처리 & 챔피언 모델 추론 (preprocessor + LightGBM)      │
+│  3. 🛡️ 보안 가드레일 (사내 Wiki 외 질문 시 '보안 규정 외 정보' 원천 차단)│
+└────────────────────────────────────────────────────────────────────────┘
+      </div>
+
+      <div class="callout callout-info">
+        <strong>💡 개발 및 배포 원칙:</strong> 먼저 일반 웹 브라우저 환경에서 모든 기능(인증, 진단, 드리프트, 챗봇, 시뮬레이터, 다운로드)이 100% 정상 작동하도록 검증한 뒤, PWA 매니페스트와 현장 QR 코드 스캔 기능을 활성화하여 모바일/태블릿 현장 배포로 자연스럽게 확장합니다.
+      </div>
+    </section>
+
+    <!-- 2. 역할 분리 -->
+    <section id="roles" class="guide-section">
+      <h2 class="section-title">👥 2. 역할 분리 (직원용 vs 관리자용)</h2>
+      <p>
+        사용자 권한(Role-Based Access Control)을 분리하여 불필요한 정보 노출을 방지하고 작업 집중도를 극대화합니다.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">👷 [직원용: 현장 엔지니어 / 오퍼레이터]</span>
+            <span class="badge badge-secondary">Field Engineer</span>
+          </div>
+          <p>설비 앞이나 클린룸 작업대에서 직관적이고 빠르게 조치할 수 있는 화면:</p>
+          <ul class="checklist">
+            <li><span class="check-icon">✓</span> <b>초고속 불량 센서 진단</b>: 웨이퍼 번호 검색 ➔ 위험도 게이지 및 5대 이상 센서 즉시 출력</li>
+            <li><span class="check-icon">✓</span> <b>SHAP 원인 분석 요약</b>: 진짜 불량(#1254 단선/과전압) vs 가양성(#242 전극 마모) 해명</li>
+            <li><span class="check-icon">✓</span> <b>챔버 노후화 일상 점검표</b>: CVD/식각 드리프트 현황 확인 & 점검 체크리스트 제출</li>
+            <li><span class="check-icon">✓</span> <b>공정 QA 챗봇 질의</b>: 작업 중 발생한 센서 이상 및 조치 매뉴얼 질문</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">👨‍💼 [관리자용: 공정 관리자 / 품질 팀장]</span>
+            <span class="badge badge-primary">Fab Manager</span>
+          </div>
+          <p>공정 전체 수율, 모델 통계 및 설비 수명 주기를 총괄 관제하는 화면:</p>
+          <ul class="checklist">
+            <li><span class="check-icon">✓</span> <b>공정 전체 수율 & 시계열 트렌드</b>: 8월 피크(15.8%) 분석 및 7일 이동평균 관제</li>
+            <li><span class="check-icon">✓</span> <b>AI 모델 종합 성능 평가</b>: 상위 20% 우선 검토 성과 (Recall 71.4%, 15/21 불량 적발)</li>
+            <li><span class="check-icon">✓</span> <b>314건 혼동행렬 전수 대시보드</b>: TP 15, FP 48, FN 6, TN 245 완벽 검증</li>
+            <li><span class="check-icon">✓</span> <b>설비 드리프트 총괄 관리</b>: 핵심 6종 센서 랭킹 및 예방정비(PM) 주기 설정</li>
+            <li><span class="check-icon">✓</span> <b>산출물 다운로드 센터</b>: 마크다운 보고서, 314건 시험 예측표(CSV), 300 DPI 차트 반출</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 2대 핵심 공정 미션 -->
+    <section id="missions" class="guide-section">
+      <h2 class="section-title">🎯 3. 2대 핵심 공정 미션 구현 규격</h2>
+      <p>
+        반도체 제조 라인의 본질적 두 가지 요구사항을 웹앱의 가장 중심 인터페이스로 배치합니다.
+      </p>
+
+      <h3 class="subsection-title"><span class="step-pill">1</span> 미션 1: 빠르게 불량 센서(원인)를 찾는 것</h3>
+      <p>
+        웨이퍼 식별자(ID)를 입력하거나 원클릭 퀵버튼(<code>[🚨 진짜 불량 #1254]</code>, <code>[🔍 가양성 오탐 #242]</code>)을 누르면 0.05초 만에 진단 결과가 렌더링됩니다.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>웨이퍼 #1254 (진짜 불량 적발 1호)</th>
+            <th>웨이퍼 #242 (최고 위험 가양성 오탐 1위)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>실제 라벨</b></td>
+            <td><span class="badge" style="background:#fee2e2; color:#b91c1c;">실제 불량 (1)</span> (Rank 6, 위험 점수 52.1%)</td>
+            <td><span class="badge" style="background:#f1f5f9; color:#475569;">실제 정상 (0)</span> (Rank 1, 위험 점수 53.3%)</td>
+          </tr>
+          <tr>
+            <td><b>핵심 이상 센서</b></td>
+            <td><code>feature_489</code> (0.0으로 완전 단선 드롭아웃)<br><code>feature_512</code> (800.0 과전압 서지, +2.45σ)</td>
+            <td><code>feature_60</code> (식각 전극 전압 이탈, +1.44)<br><code>feature_104</code> (식각 챔버 하강 드리프트 센서, +0.82)</td>
+          </tr>
+          <tr>
+            <td><b>SHAP 기여도</b></td>
+            <td><code>feature_489</code> SHAP +1.00 (치명적 결함 기여)<br><code>feature_512</code> SHAP +0.60</td>
+            <td><code>feature_60</code> SHAP +1.44 (위험도 상승 견인)<br><code>feature_104</code> SHAP +0.82</td>
+          </tr>
+          <tr>
+            <td><b>공학적 판정</b></td>
+            <td><b>[결함 확정]</b> 센서 단선 및 과전압에 의한 물리적 불량 적발</td>
+            <td><b>[오탐 해명]</b> 정상 웨이퍼이나 식각 전극 마모로 인한 보수적 안전마진 경보</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="subsection-title"><span class="step-pill">2</span> 미션 2: 노후화된 장비(증착/식각 센서 드리프트) 찾아 점검하기</h3>
+      <p>
+        3대 다면 통계(켄달 타우 단조성 + 누적 표준화 기울기 + 기저 이동량)로 도출된 핵심 6종 센서를 챔버별로 분류하여 일상 점검 가이드를 제공합니다.
+      </p>
+      <div class="grid-2">
+        <div class="card" style="border-top: 4px solid #ef4444;">
+          <div class="card-header">
+            <span class="card-title">🔥 CVD 화학기상증착 챔버 점검</span>
+            <span class="badge badge-accent">기저 상승 (Upward)</span>
+          </div>
+          <p><b>대상 센서:</b> <code>feature_29</code> (+2.04σ), <code>feature_543</code> (+1.78σ), <code>feature_170</code> (+1.53σ)</p>
+          <p><b>물리적 원인:</b> 가공 누적에 따라 반응 부산물이 챔버 내벽 및 가스 노즐에 증착(Coating)되어 RF 임피던스 및 배압 상승.</p>
+          <ul class="checklist">
+            <li><span class="check-icon">□</span> 플라즈마 건식 클리닝(NF3 In-situ Clean) 주기 20% 단축</li>
+            <li><span class="check-icon">□</span> 샤워헤드(Showerhead) 분사 노즐 탈거 및 화학 세정</li>
+            <li><span class="check-icon">□</span> 챔버 배기 조절 밸브(Throttle Valve) 응답성 점검</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-top: 4px solid #3b82f6;">
+          <div class="card-header">
+            <span class="card-title">⚡ Dry Etch 건식 식각 챔버 점검</span>
+            <span class="badge badge-secondary">기저 하강 (Downward)</span>
+          </div>
+          <p><b>대상 센서:</b> <code>feature_104</code> (-1.73σ), <code>feature_80</code> (-1.71σ), <code>feature_60</code> (-1.49σ, -99.1% 폭락)</p>
+          <p><b>물리적 원인:</b> 고밀도 플라즈마 충돌로 하부 전극 및 포커스 링이 깎여나가며 RF 전송 효율 감소 및 영점 하강.</p>
+          <ul class="checklist">
+            <li><span class="check-icon">□</span> 포커스 링(Focus Ring) 두께 측정 후 한계 마모 시 즉시 교체</li>
+            <li><span class="check-icon">□</span> 정전척(ESC) RF 매처(Matcher) 영점 재보정</li>
+            <li><span class="check-icon">□</span> <code>feature_60</code> 대응 전력 공급 모듈(Power Generator) 선제 교체</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 보안 폐쇄형 챗봇 -->
+    <section id="chatbot" class="guide-section">
+      <h2 class="section-title">🤖 4. 보안 폐쇄형 LLM Wiki 챗봇 (RAG Engine)</h2>
+      <p>
+        사외 LLM으로 회사 공정 데이터가 유출되는 것을 차단하고, <b>오로지 사내에 승인된 SECOM 공정 지식 Wiki 내용만을 근거로 답변</b>하도록 제약하는 보안 폐쇄형 챗봇 시스템입니다.
+      </p>
+
+      <h3 class="subsection-title">1) 공정 지식 위키 구조 (`secom_wiki_knowledge.json`)</h3>
+      <p>종합 진단 보고서, 이상치 분석 결과, 시계열 트러블 타임라인, 설비 매뉴얼을 JSON/Markdown 지식 베이스로 구축합니다:</p>
+      <pre class="code-block">{
+  "factory_summary": {
+    "total_wafers": 1567,
+    "defect_rate": "6.64%",
+    "valid_features": 232,
+    "august_trouble": "8월 34주차 7일 이동평균 불량률 15.8% 급증 (Spike), 9월 중순 PM 후 3.0% 미만 안정화"
+  },
+  "champion_model": {
+    "algorithm": "LightGBM + scale_pos_weight=5.0 + abnormal_sensor_count",
+    "recall_at_20": "71.4% (15건 적발 / 전체 21건)",
+    "selected_samples": 63,
+    "confusion_matrix": {"tp": 15, "fp": 48, "fn": 6, "tn": 245}
+  },
+  "wafer_diagnostics": {
+    "1254": "실제 불량(1), feature_489 단선 드롭아웃(0.0, SHAP +1.00), feature_512 과전압(800.0, SHAP +0.60)",
+    "242": "실제 정상(0), 가양성 오탐 1위, Dry Etch 식각 전극 마모 센서(feature_60, feature_104)로 인한 안전마진 경보"
+  },
+  "chamber_drift_pdm": {
+    "cvd": "feature_29(+2.04σ), feature_543(+1.78σ) 기저 상승 ➔ 샤워헤드 세정 및 NF3 드라이 클리닝 권고",
+    "dry_etch": "feature_104(-1.73σ), feature_60(-1.49σ) 기저 하강 ➔ 포커스 링 교체 및 RF 매처 재보정 권고"
+  }
+}</pre>
+
+      <h3 class="subsection-title">2) 무환각(Zero-Hallucination) 보안 시스템 프롬프트</h3>
+      <pre class="code-block">SYSTEM_PROMPT = """
+당신은 SEMI-GUARD 반도체 팹 사내 보안 전용 AI 엔지니어입니다.
+반드시 아래 [SECOM 공정 지식 WIKI]에 명시된 사실만을 근거로 답변하십시오.
+
+[보안 지침]:
+1. 위키에 등록되지 않은 외부 상식, 사외 질문, 사설 의견은 일체 답변하지 마십시오.
+2. 위키에 없는 내용을 질문받으면 반드시 다음과 같이 정형화된 거절 문구로 답하십시오:
+   "⚠️ 반도체 보안 지침에 따라 공정 위키에 등록된 승인 데이터만 답변할 수 있습니다."
+3. 수치(71.4%, 63건, 15.8% 등)와 센서 번호(feature_489 등)는 위키에 기록된 수치를 100% 엄수하십시오.
+"""</pre>
+    </section>
+
+    <!-- 5. 시뮬레이터 -->
+    <section id="simulator" class="guide-section">
+      <h2 class="section-title">🧪 5. 신규 데이터 실시간 배치 시뮬레이터 (Simulator)</h2>
+      <p>
+        신규 롯(Lot) 또는 미지의 웨이퍼 센서 데이터셋(CSV)을 드래그 앤 드롭했을 때, 전처리 파이프라인과 모델이 실시간으로 정상 작동하는지 검증합니다.
+      </p>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚙️ 5단계 실시간 인퍼런스 파이프라인 (`simulate_batch_inference`)</span>
+          <span class="badge badge-cyan">0.05초 초고속 서빙</span>
+        </div>
+        <ol style="padding-left: 20px; line-height: 1.8;">
+          <li><b>유효 센서 정합성 체크</b>: 입력 CSV에서 232개 유효 센서 열이 존재하는지 검증</li>
+          <li><b>중앙값 대체 (Imputation)</b>: 학습 데이터(Train) 정상군 중앙값으로 결측치 완벽 대체</li>
+          <li><b>표준화 스케일링 (Robust/Standard Scaler)</b>: 누수 없이 학습 객체 기반 변환</li>
+          <li><b>파생변수 생성 (`abnormal_sensor_count`)</b>: 정상 기준 2시그마 초과 센서 개수 산출</li>
+          <li><b>챔피언 모델 스코어링 & 순위화</b>: 불량 확률 산출 ➔ 상위 20% 우선 검토 자동 분기 ➔ UTF-8-SIG 한글 엑셀 CSV 다운로드 버튼 제공</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 6. Cloud Run 배포 -->
+    <section id="cloudrun" class="guide-section">
+      <h2 class="section-title">☁️ 6. Google Cloud Run 서버 구축 & 배포</h2>
+      <p>
+        FastAPI 기반의 경량 백엔드를 도커 컨테이너로 빌드하여 Google Cloud Run에 배포함으로써 전 세계 어디서든 안전하게 호출 가능한 서버리스 API를 구축합니다.
+      </p>
+
+      <h3 class="subsection-title">1) 백엔드 REST API 엔드포인트 설계</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>메서드</th>
+            <th>엔드포인트</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/chat</code></td>
+            <td>사내 LLM Wiki 지식 기반 챗봇 질의응답 (보안 프롬프트 적용)</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/predict-batch</code></td>
+            <td>신규 웨이퍼 CSV 업로드 및 실시간 배치 추론</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/wafer/{sample_id}</code></td>
+            <td>특정 웨이퍼 불량 위험도, 5대 이상 센서 및 SHAP 기여도 조회</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/drift-status</code></td>
+            <td>CVD / Dry Etch 6대 핵심 드리프트 센서 및 정비 가이드 조회</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/download/{file_type}</code></td>
+            <td>종합 진단 보고서(MD) 및 314건 시험 예측표(CSV) 다운로드</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="subsection-title">2) Cloud Run 배포용 Dockerfile</h3>
+      <pre class="code-block">FROM python:3.10-slim
+
+WORKDIR /app
+
+# 시스템 의존성 설치
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 코드 및 모델 아티팩트 복사
+COPY . .
+
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8080"]</pre>
+
+      <h3 class="subsection-title">3) 1클릭 Cloud Run 배포 스크립트 (`deploy_cloud_run.sh`)</h3>
+      <pre class="code-block">#!/bin/bash
+# Google Cloud Run 배포 스크립트
+PROJECT_ID="semiguard-project"
+SERVICE_NAME="semiguard-api"
+REGION="asia-northeast3" # 서울 리전
+
+gcloud config set project $PROJECT_ID
+gcloud run deploy $SERVICE_NAME \
+  --source . \
+  --region $REGION \
+  --allow-unauthenticated \
+  --memory 1Gi \
+  --cpu 1</pre>
+    </section>
+
+    <!-- 7. PWA & QR 코드 연동 -->
+    <section id="pwa-qr" class="guide-section">
+      <h2 class="section-title">📱 7. PWA & 현장 QR 코드 연동 (Field Deployment)</h2>
+      <p>
+        웹앱을 모바일과 태블릿에서 네이티브 앱처럼 설치하고 현장 설비의 QR 코드를 스캔하여 1초 만에 진입하는 워크플로우입니다.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📱 PWA 매니페스트 (`manifest.json`)</span>
+            <span class="badge badge-cyan">App Installable</span>
+          </div>
+          <p>홈 화면 추가, 오프라인 캐싱(`sw.js`), 전체화면 독립 실행 지원:</p>
+          <pre class="code-block">{
+  "name": "SEMI-GUARD 반도체 공정 관제",
+  "short_name": "SEMI-GUARD",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📷 현장 QR 코드 워크플로우</span>
+            <span class="badge badge-accent">Fab QR Scan</span>
+          </div>
+          <ol style="padding-left: 18px; line-height: 1.8;">
+            <li><b>설비 부착 QR 스캔</b>: CVD 챔버 앞 QR 스캔 ➔ 해당 챔버 드리프트 점검표 자동 실행</li>
+            <li><b>웨이퍼 로트 QR 스캔</b>: 카세트 바코드 스캔 ➔ 불량 위험도 및 이상 센서 즉시 조회</li>
+            <li><b>시연 모달 제공</b>: 웹 화면 상단 <code>[📱 모바일 QR 연결]</code> 버튼 클릭 시 카메라로 스캔 가능한 QR 코드 팝업</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 다운로드 센터 -->
+    <section id="assets" class="guide-section">
+      <h2 class="section-title">📥 8. 보고서/차트 다운로드 센터 (Asset Download Center)</h2>
+      <p>
+        현장 엔지니어와 관리자가 보고 및 분석에 필요한 모든 자산을 브라우저에서 직접 원클릭으로 다운로드할 수 있습니다.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>자산명</th>
+            <th>파일명</th>
+            <th>용도</th>
+            <th>형식</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>종합 진단 보고서</b></td>
+            <td><code>SECOM_공정_품질_종합_진단_보고서.md</code></td>
+            <td>데이터 진단, 추천규칙, 성능평가, 설비 드리프트 통합 문서</td>
+            <td><span class="badge badge-primary">Markdown (.md)</span></td>
+          </tr>
+          <tr>
+            <td><b>위험 순위 시험 예측표</b></td>
+            <td><code>SECOM_위험순위_시험예측표_314건.csv</code></td>
+            <td>한글 엑셀 완벽 호환(UTF-8-SIG), 상위 20% 불량 랭킹 전수 데이터</td>
+            <td><span class="badge badge-secondary">Excel CSV (.csv)</span></td>
+          </tr>
+          <tr>
+            <td><b>XAI 투트랙 분석도</b></td>
+            <td><code>Day3_고도화_SHAP_투트랙_비교_샘플1254_242.png</code></td>
+            <td>진짜 불량 #1254 결함 원인 vs 가양성 #242 오탐 해명 대조 차트</td>
+            <td><span class="badge badge-accent">300 DPI PNG</span></td>
+          </tr>
+          <tr>
+            <td><b>설비 드리프트 모니터링도</b></td>
+            <td><code>Day3_상승_하강_센서드리프트_비교.png</code></td>
+            <td>CVD 증착(상승 3종) vs Dry Etch 식각(하강 3종) 시계열 비교 차트</td>
+            <td><span class="badge badge-cyan">300 DPI PNG</span></td>
+          </tr>
+          <tr>
+            <td><b>시계열 트러블 타임라인</b></td>
+            <td><code>R05_월별_생산량_및_불량률_추이.png</code></td>
+            <td>8월 34주차 불량률 급증(15.8%) 및 7일 롤링 이동평균 차트</td>
+            <td><span class="badge badge-primary">300 DPI PNG</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 9. 최종 체크리스트 -->
+    <section id="checklist" class="guide-section">
+      <h2 class="section-title">✅ 9. 최종 구현 체크리스트</h2>
+      <div class="card">
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> <b>Firebase 인증 모듈 연동</b>: 로그인, 회원가입, 역할(직원/관리자) 분기 및 로컬 데모 스위칭</li>
+          <li><span class="check-icon">✓</span> <b>직원 화면 (미션 1)</b>: 웨이퍼 검색 ➔ 5대 이상 센서 및 #1254/#242 XAI 원인 즉각 출력</li>
+          <li><span class="check-icon">✓</span> <b>직원 화면 (미션 2)</b>: CVD/Dry Etch 챔버 상태 표시 및 현장 점검 체크리스트 제공</li>
+          <li><span class="check-icon">✓</span> <b>관리자 화면</b>: 공정 시계열 트렌드, 20% 우선검사 모델 성과(Recall 71.4%), 314건 혼동행렬 대시보드</li>
+          <li><span class="check-icon">✓</span> <b>사내 LLM Wiki 챗봇</b>: 위키 기반 폐쇄형 질의응답 및 외부 정보 차단 보안 가드레일</li>
+          <li><span class="check-icon">✓</span> <b>신규 데이터 시뮬레이터</b>: 미지의 CSV 드래그 앤 드롭 및 0.05초 실시간 스코어링 & 다운로드</li>
+          <li><span class="check-icon">✓</span> <b>자산 다운로드 센터</b>: 마크다운 보고서, 314건 엑셀 CSV, 300 DPI 분석 이미지 원클릭 다운로드</li>
+          <li><span class="check-icon">✓</span> <b>Cloud Run 컨테이너 패키징</b>: FastAPI 백엔드, Dockerfile, requirements.txt, 배포 스크립트 완비</li>
+          <li><span class="check-icon">✓</span> <b>PWA & QR 연동</b>: manifest.json, sw.js, 현장 모바일 접속용 QR 팝업 모달 탑재</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

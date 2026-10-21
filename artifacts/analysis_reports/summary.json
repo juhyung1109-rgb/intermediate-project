@@ -1,0 +1,38 @@
+[
+  {
+    "filename": "secom_test_batch_200811_200903.csv",
+    "rows": 500,
+    "missing_cells": 13253,
+    "known_labels": 500,
+    "confirmed_failures": 31,
+    "top20_recall": 0.3548387096774194,
+    "model_version": "777d4a5683437110b7ec"
+  },
+  {
+    "filename": "sim_batch_200_200904_200905.csv",
+    "rows": 200,
+    "missing_cells": 5280,
+    "known_labels": 200,
+    "confirmed_failures": 9,
+    "top20_recall": 0.2222222222222222,
+    "model_version": "777d4a5683437110b7ec"
+  },
+  {
+    "filename": "sim_batch_300_200906_200908.csv",
+    "rows": 300,
+    "missing_cells": 8064,
+    "known_labels": 300,
+    "confirmed_failures": 22,
+    "top20_recall": 0.22727272727272727,
+    "model_version": "777d4a5683437110b7ec"
+  },
+  {
+    "filename": "sim_batch_400_200909_200912.csv",
+    "rows": 400,
+    "missing_cells": 10367,
+    "known_labels": 400,
+    "confirmed_failures": 12,
+    "top20_recall": 0.16666666666666666,
+    "model_version": "777d4a5683437110b7ec"
+  }
+]

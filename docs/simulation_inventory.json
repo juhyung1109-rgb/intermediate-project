@@ -1,0 +1,134 @@
+[
+  {
+    "file": "secom_test_batch_200811_200903.csv",
+    "rows": 500,
+    "sensors": 590,
+    "start": "2008-11-01 09:03:24",
+    "end": "2009-03-31 20:46:29",
+    "failures": 31,
+    "missing_cells": 13253,
+    "duplicate_ids": 0,
+    "months": [
+      {
+        "timestamp": "2008-11",
+        "count": 100,
+        "sum": 4,
+        "mean": 0.04
+      },
+      {
+        "timestamp": "2008-12",
+        "count": 100,
+        "sum": 8,
+        "mean": 0.08
+      },
+      {
+        "timestamp": "2009-01",
+        "count": 100,
+        "sum": 12,
+        "mean": 0.12
+      },
+      {
+        "timestamp": "2009-02",
+        "count": 100,
+        "sum": 4,
+        "mean": 0.04
+      },
+      {
+        "timestamp": "2009-03",
+        "count": 100,
+        "sum": 3,
+        "mean": 0.03
+      }
+    ]
+  },
+  {
+    "file": "sim_batch_200_200904_200905.csv",
+    "rows": 200,
+    "sensors": 590,
+    "start": "2009-04-01 08:37:58",
+    "end": "2009-05-31 12:44:33",
+    "failures": 9,
+    "missing_cells": 5280,
+    "duplicate_ids": 0,
+    "months": [
+      {
+        "timestamp": "2009-04",
+        "count": 99,
+        "sum": 4,
+        "mean": 0.0404
+      },
+      {
+        "timestamp": "2009-05",
+        "count": 101,
+        "sum": 5,
+        "mean": 0.0495
+      }
+    ]
+  },
+  {
+    "file": "sim_batch_300_200906_200908.csv",
+    "rows": 300,
+    "sensors": 590,
+    "start": "2009-06-01 08:27:45",
+    "end": "2009-08-31 14:58:16",
+    "failures": 22,
+    "missing_cells": 8064,
+    "duplicate_ids": 0,
+    "months": [
+      {
+        "timestamp": "2009-06",
+        "count": 98,
+        "sum": 4,
+        "mean": 0.04082
+      },
+      {
+        "timestamp": "2009-07",
+        "count": 101,
+        "sum": 4,
+        "mean": 0.0396
+      },
+      {
+        "timestamp": "2009-08",
+        "count": 101,
+        "sum": 14,
+        "mean": 0.13861
+      }
+    ]
+  },
+  {
+    "file": "sim_batch_400_200909_200912.csv",
+    "rows": 400,
+    "sensors": 590,
+    "start": "2009-09-01 08:00:00",
+    "end": "2009-12-31 13:44:55",
+    "failures": 12,
+    "missing_cells": 10367,
+    "duplicate_ids": 0,
+    "months": [
+      {
+        "timestamp": "2009-09",
+        "count": 98,
+        "sum": 2,
+        "mean": 0.02041
+      },
+      {
+        "timestamp": "2009-10",
+        "count": 102,
+        "sum": 2,
+        "mean": 0.01961
+      },
+      {
+        "timestamp": "2009-11",
+        "count": 99,
+        "sum": 2,
+        "mean": 0.0202
+      },
+      {
+        "timestamp": "2009-12",
+        "count": 101,
+        "sum": 6,
+        "mean": 0.05941
+      }
+    ]
+  }
+]
