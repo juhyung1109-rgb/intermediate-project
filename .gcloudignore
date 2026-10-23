@@ -14,4 +14,13 @@ runtime/
 *.zip
 *.pptx
 artifacts/analysis_reports/*.sqlite3*
-picture/
+picture/*.html
+picture/*.psd
+data/raw/
+raw/
+tests/
+tools/
+docs/*.docx
+docs/SECOM_*.html
+*.sqlite3*
+

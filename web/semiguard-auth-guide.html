@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="SEMI-GUARD 반도체 팹 사내 보안 관제 플랫폼: 모바일 PWA, 사원 가입 승인제, Cloud Run, Vertex AI / Gemini 3.8 Flash, 12대 Python 분석 Tool 및 데이터 격리 아키텍처 가이드">
+<title>SEMI-GUARD 보안 & 인증 아키텍처 가이드</title>
+<style>
+:root{--paper:#f6f8f7;--card:#fff;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--teal:#059669;--teal-soft:#ecfdf5;--violet:#4f46e5;--violet-soft:#eef2ff;--amber:#d97706;--amber-soft:#fffbeb;--navy:#0f172a;--blue:#2563eb;--blue-soft:#eff6ff;--mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}body{margin:0;color:var(--ink);background:var(--paper);font:16px/1.85 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;word-break:keep-all;overflow-wrap:anywhere}a{color:var(--blue);text-underline-offset:4px}a:hover{text-decoration-thickness:2px}button{font:inherit;cursor:pointer}button,a{-webkit-tap-highlight-color:transparent}:focus-visible{outline:3px solid #2563eb;outline-offset:4px}[hidden]{display:none!important}
+.top{border-bottom:1px solid var(--line);background:white}.top-inner{max-width:1420px;margin:auto;padding:17px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-size:.88rem;font-weight:800;letter-spacing:.035em;display:flex;align-items:center;gap:10px}.mark{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--blue);color:white}.edition{font-size:.75rem;color:var(--muted)}.hero{max-width:1420px;margin:auto;padding:60px 36px 40px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:50px;align-items:end}.eyebrow{margin:0 0 15px;color:var(--blue);font-size:.76rem;font-weight:850;letter-spacing:.15em}h1{font-size:clamp(2rem,3.8vw,3.2rem);line-height:1.3;letter-spacing:-.045em;margin:0 0 20px}h1 span{color:var(--blue)}.hero p{color:var(--muted);max-width:800px;margin:0}.hero-note{font-size:.8rem;margin-top:16px!important}.hero-aside{background:var(--navy);border-radius:15px;padding:26px;color:white}.hero-aside .eyebrow{color:#93c5fd}.hero-aside h2{color:white;font-size:1.25rem;line-height:1.6;margin-bottom:12px}.hero-aside p{color:#cbd5e1;font-size:.88rem}.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.pill{padding:4px 12px;border:1px solid #93c5fd;border-radius:99px;font-size:.75rem;background:#eff6ff;color:#1e40af;font-weight:700}
+.layout{max-width:1420px;margin:auto;padding:0 36px 72px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:36px;align-items:start}.sidebar{position:sticky;top:25px;padding-top:17px}.toc-label{margin:0 0 13px;color:var(--muted);font:700 .68rem/1.5 var(--mono);letter-spacing:.14em}.toc{display:grid;gap:4px}.toc a{text-decoration:none;color:var(--muted);font-size:.82rem;padding:7px 10px;border-left:2px solid transparent;display:flex;gap:10px;border-radius:0 6px 6px 0}.toc a span{font:600 .68rem/1.9 var(--mono);color:#64748b}.toc a:hover,.toc a[aria-current="location"]{color:var(--blue);border-left-color:var(--blue);background:#eff6ff;font-weight:700}.sidebar-foot{border-top:1px solid var(--line);padding-top:17px;margin-top:24px;color:var(--muted);font-size:.74rem}.sidebar-foot a{display:block;margin-top:8px}main{min-width:0}.chapter{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px;margin-bottom:25px;scroll-margin-top:28px}.chapter-head{display:flex;align-items:baseline;gap:13px;margin-bottom:19px}.num{font:700 .78rem/1.5 var(--mono);color:var(--blue);flex-shrink:0}h2{font-size:1.6rem;line-height:1.5;letter-spacing:-.035em;margin:0}h3{font-size:1.1rem;line-height:1.6;letter-spacing:-.015em;margin:24px 0 10px}p{margin:0 0 16px}p:last-child{margin-bottom:0}.lead{color:var(--muted);font-size:.96rem}.fine{font-size:.8rem;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:22px 0}.card{border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}.card h3{font-size:1.02rem;margin:4px 0 8px}.card p{font-size:.85rem;color:var(--muted);margin:0}.card .tag{font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--muted)}.card.blue{background:var(--blue-soft);border-color:#bfdbfe}.card.teal{background:var(--teal-soft);border-color:#a7f3d0}.card.amber{background:var(--amber-soft);border-color:#fde68a}.callout{padding:18px 22px;border-left:4px solid var(--blue);background:var(--blue-soft);border-radius:0 8px 8px 0;margin:22px 0;font-size:.92rem}.callout.teal{background:var(--teal-soft);border-color:var(--teal)}.callout.amber{background:var(--amber-soft);border-color:var(--amber)}.callout p{margin:0}.mini-flow{display:flex;gap:10px;align-items:center;margin:22px 0;flex-wrap:wrap}.mini-node{flex:1;min-width:140px;border:1px solid #cbd5e1;border-radius:9px;padding:15px 12px;text-align:center;background:#ffffff;font-size:.92rem;font-weight:750}.mini-node small{display:block;font-size:.74rem;color:var(--muted);font-weight:400;margin-top:5px}.mini-arrow{color:var(--blue);font-size:22px;font-weight:700}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:610px}th,td{padding:12px 16px;vertical-align:top;text-align:left;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}th:last-child,td:last-child{border-right:0}tr:last-child th,tr:last-child td{border-bottom:0}thead{background:#f1f5f9}tbody th{font-weight:700;background:#f8fafc;width:20%}.figure{margin:26px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 4px 16px rgba(0,0,0,0.04)}.image-button{display:block;width:100%;border:0;margin:0;padding:0;background:white;cursor:zoom-in;line-height:0}.image-button img{display:block;width:100%;height:auto}.figure figcaption{padding:14px 18px;display:flex;gap:16px;justify-content:space-between;align-items:center;font-size:.78rem;line-height:1.7;color:var(--muted);background:#f8fafc;border-top:1px solid var(--line)}.figure figcaption strong{color:var(--ink)}.figure-actions{display:flex;gap:12px;flex-shrink:0}.figure-actions button{border:0;background:none;padding:0;color:var(--blue);font-size:inherit;font-weight:700;text-decoration:underline;text-underline-offset:4px}.steps{padding:0;margin:20px 0;list-style:none;counter-reset:step}.steps>li{position:relative;padding:0 0 22px 46px;counter-increment:step}.steps>li:before{content:counter(step);position:absolute;left:0;top:2px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--blue-soft);color:var(--blue);font:750 .8rem var(--mono)}.steps>li+li{border-top:1px solid var(--line);padding-top:22px}.steps>li+li:before{top:24px}.steps h3{margin:0 0 8px;font-size:1.05rem}.steps p{font-size:.9rem;color:var(--muted);margin:0}.code-block{border-radius:10px;background:#0f172a;color:#f8fafc;overflow:hidden;margin:18px 0 22px}.code-top{padding:9px 15px;background:#1e293b;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.74rem;color:#94a3b8}pre{margin:0;padding:18px 20px;overflow:auto;font:12.5px/1.85 var(--mono);tab-size:2;white-space:pre}code{font-family:var(--mono)}:not(pre)>code{font-size:.86em;padding:2px 6px;border-radius:4px;background:#e2e8f0;color:#0f172a}.footer{max-width:1420px;margin:auto;padding:0 36px 36px;font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;gap:20px}
+dialog{border:0;border-radius:14px;padding:0;width:calc(100vw - 40px);max-width:1600px;max-height:calc(100vh - 40px);background:#f8fafc;box-shadow:0 25px 100px rgba(15,23,42,0.4)}dialog::backdrop{background:rgba(15,23,42,0.85)}.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 20px;border-bottom:1px solid var(--line);background:white}.dialog-head p{margin:0;font-size:.88rem;font-weight:700}.dialog-close{border:1px solid var(--line);background:white;border-radius:6px;padding:5px 14px;font-size:.84rem;font-weight:700}.dialog-body{overflow:auto;max-height:calc(100vh - 120px);padding:20px;text-align:center}.dialog-body img{display:block;width:auto;max-width:100%;height:auto;margin:auto;border-radius:8px}
+@media(max-width:1080px){.hero{gap:30px;grid-template-columns:1fr;padding-top:40px}.layout{grid-template-columns:1fr}.sidebar{display:none}.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-inner"><div class="brand"><span class="mark" aria-hidden="true">⚙️</span> SEMI-GUARD × CLOUD RUN × GEMINI</div><span class="edition">그림으로 보는 팹 보안 인증 가이드 · 2026.10.23</span></div></header>
+
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">SEMI-GUARD INTEGRATED SECURITY ARCHITECTURE</p><h1 id="page-title">모바일 PWA에서 Gemini까지,<br><span>누가 어떻게 인증하고 통제할까?</span></h1><p>반도체 클린룸 현장 실무자가 PWA 모바일 앱에 접속하여 사원 가입 승인, Cloud Run 토큰 검증, Vertex AI / Gemini 3.8 Flash 질의 및 12대 정밀 Python 도구를 실행하는 전체 보안 구조를 두 장의 정밀 흐름도와 단계별 시퀀스로 정리했습니다.</p><div class="pill-row"><span class="pill">Android · iOS PWA</span><span class="pill">Firebase Authentication (승인제)</span><span class="pill">Cloud Run (Python 3.11)</span><span class="pill">Vertex AI · Gemini 3.8 Flash</span><span class="pill">12대 정밀 Python Tools</span></div><p class="hero-note">운영 서버: <a href="https://semiguard-app-ahftuulaqq-uc.a.run.app" target="_blank">https://semiguard-app-ahftuulaqq-uc.a.run.app</a> · 프로젝트: iceu-songpa03</p></div>
+<aside class="hero-aside"><p class="eyebrow" style="color:#93c5fd;">핵심 보안 원칙</p><h2>사원은 관리자 승인 후 로그인,<br>도구 실행은 서버가 통제,<br>AI는 검증된 신원으로 호출.</h2><p>신규 사원은 승인 전까지 접근이 완벽히 차단되며, Gemini는 분석 도구를 직접 실행하지 않고 Cloud Run이 화이트리스트로 제어합니다.</p></aside>
+</section>
+
+<div class="layout">
+<aside class="sidebar" aria-label="문서 목차"><p class="toc-label">READING MAP</p><nav class="toc"><a href="#overview"><span>00</span>신원 3계층 분리</a><a href="#architecture"><span>01</span>전체 시스템 구조</a><a href="#approval"><span>02</span>사원 가입 승인제</a><a href="#tools"><span>03</span>도구 실행 제어 루프</a><a href="#storage"><span>04</span>데이터 & 인프라 격리</a></nav><div class="sidebar-foot"><a href="/" style="font-weight:700;">← SEMI-GUARD 관제 센터 이동</a><a href="https://semiguard-app-ahftuulaqq-uc.a.run.app" target="_blank">Cloud Run 라이브 서버 ↗</a></div></aside>
+
+<main id="main">
+<!-- Chapter 00 -->
+<section class="chapter" id="overview">
+<div class="chapter-head"><span class="num">00</span><h2>세 가지 주체와 신원을 명확히 분리합니다</h2></div>
+<p class="lead">SEMI-GUARD는 사용자(엔지니어/관리자), 실행 서버(Cloud Run), 배포자(개발자/CI)의 세 역할을 분리하여 운영합니다.</p>
+<div class="cards"><article class="card blue"><span class="tag">APP USER</span><h3>사원 신원 (인증 및 인가)</h3><p>Firebase Authentication으로 신원을 증명합니다. 미승인(`pending`) 사원은 즉시 세션이 해제되며, 관리자가 승인한 사원만 팹 관제센터에 로그인할 수 있습니다.</p></article><article class="card teal"><span class="tag">RUNTIME IDENTITY</span><h3>서버 신원 (Cloud Run)</h3><p>Cloud Run 컨테이너의 서비스 계정입니다. GCP 내부 메타데이터 토큰으로 Firestore와 통신하고, ADC를 통해 Vertex AI / Gemini 3.8 Flash를 호출합니다.</p></article><article class="card amber"><span class="tag">TOOL CONTROLLER</span><h3>도구 실행 통제 (Sandboxed)</h3><p>Gemini가 임의 쉘이나 외부 코드를 직접 실행하지 못하도록 Cloud Run의 AnalysisAgent가 12대 화이트리스트 도구와 파라미터를 엄격히 통제합니다.</p></article></div>
+<div class="mini-flow"><div class="mini-node">모바일 PWA<small>Firebase 사원 계정 (승인 완료자만)</small></div><span class="mini-arrow">➔</span><div class="mini-node">Cloud Run<small>세션·소유권 검증 + 도구 제어</small></div><span class="mini-arrow">➔</span><div class="mini-node">Vertex AI · Gemini<small>GCP ADC / IAM 런타임 신원</small></div></div>
+</section>
+
+<!-- Chapter 01 -->
+<section class="chapter" id="architecture">
+<div class="chapter-head"><span class="num">01</span><h2>SEMI-GUARD 전체 서비스 & 보안 아키텍처</h2></div>
+<p class="lead">모바일 PWA 앱, Firebase Auth 관문, Cloud Run 백엔드, Vertex AI, 12대 Python 분석 도구 및 데이터 저장소가 유기적으로 연결된 전체 구조도입니다.</p>
+<figure class="figure"><button class="image-button" type="button" data-zoom><img src="/picture/semiguard_auth_architecture.jpg" alt="SEMI-GUARD 전체 아키텍처 다이어그램"></button><figcaption><span><strong>그림 1.</strong> SEMI-GUARD 통합 플랫폼 아키텍처: 모바일 PWA부터 사원 승인제, Cloud Run, Vertex AI, 12대 분석 도구 및 SQLite/Firestore 이중 저장소 구조</span><span class="figure-actions"><button type="button" data-zoom-btn>🔍 이미지 확대</button></span></figcaption></figure>
+<ol class="steps">
+<li><h3>모바일 PWA 및 클린룸 태블릿 접속</h3><p>현장 엔지니어와 공정 관리자는 기기 구분 없이 PWA 브라우저로 접속합니다. 클라이언트에는 어떤 Gemini 비밀키나 서비스 계정 키도 보관되지 않습니다.</p></li>
+<li><h3>Firebase Authentication & 가입 승인 게이트</h3><p>Firebase SDK를 통해 사내 이메일로 가입/로그인합니다. 서버는 사용자의 승인 상태(`isApproved`)를 확인하여, 승인되지 않은 계정은 메인 화면 진입을 원천 차단합니다.</p></li>
+<li><h3>Cloud Run 백엔드 & 12대 Python 도구 격리</h3><p>Python 3.11 FastAPI 기반 백엔드가 요청을 받아 데이터셋 소유권을 격리하고, Gemini와 통신하며 초고속 불량 센서 진단실(Triage), SHAP Waterfall, 센서 드리프트, 챔버 예지보전(PdM) 등 12대 도구를 실행합니다.</p></li>
+<li><h3>이중 데이터 저장소 (SQLite & Cloud Firestore)</h3><p>고속 실시간 분석 캐시는 SQLite(`runtime/analysis.sqlite3`)로 초저지연 서빙하고, 사원 프로필 및 인가 정보는 Cloud Run 내부 메타데이터 토큰으로 Google Cloud Firestore(`project` DB)에 안전하게 영구 저장합니다.</p></li>
+</ol>
+</section>
+
+<!-- Chapter 02 -->
+<section class="chapter" id="approval">
+<div class="chapter-head"><span class="num">02</span><h2>신규 사원 회원가입 승인제 라이프사이클</h2></div>
+<p class="lead">사내 보안 규정에 따라 사원이 임의로 시스템 권한을 획득할 수 없으며, 공정 관리자(Admin)가 명시적으로 승인해야만 시스템 로그인이 완료됩니다.</p>
+<figure class="figure"><button class="image-button" type="button" data-zoom><img src="/picture/semiguard_approval_sequence.jpg" alt="SEMI-GUARD 사원 가입 승인제 시퀀스"></button><figcaption><span><strong>그림 2.</strong> 사원 가입 신청 ➔ Pending 상태 차단 ➔ 관리자 승인 센터 확인 ➔ 원클릭 승인 ➔ 정식 관제센터 로그인 시퀀스</span><span class="figure-actions"><button type="button" data-zoom-btn>🔍 이미지 확대</button></span></figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>단계</th><th>주체</th><th>실행 작업</th><th>보안 상태 및 결과</th></tr></thead><tbody><tr><th>1. 가입 신청</th><td>신규 사원</td><td>이메일, 비밀번호, 성명, 희망 역할 입력 후 신청</td><td>계정 생성 즉시 <code>status='pending'</code> 지정 후 자동 강제 로그아웃(세션 차단)</td></tr><tr><th>2. 미승인 차단</th><td>미승인 사원</td><td>승인 전 이메일/비밀번호로 로그인 시도</td><td>서버가 <code>isApproved=False</code> 확인 즉시 세션 해제, <code>[승인 대기 중]</code> 경고 노출 및 진입 차단</td></tr><tr><th>3. 관리자 심사</th><td>공정 관리자</td><td>관리자 허브 접속 ➔ <code>[👥 사원 가입 승인]</code> 센터 오픈</td><td>대기 명단 확인 후 <code>[✅ 승인]</code> 클릭 ➔ <code>status='approved'</code> 실시간 업데이트</td></tr><tr><th>4. 인가 및 로그인</th><td>승인된 사원</td><td>로그인 재시도</td><td>인가 확인 완료 ➔ <code>enterApp('engineer')</code> 정상 진입 및 관제 센터 이용 허용</td></tr></tbody></table></div>
+</section>
+
+<!-- Chapter 03 -->
+<section class="chapter" id="tools">
+<div class="chapter-head"><span class="num">03</span><h2>12대 Python 분석 도구 실행 제어 루프</h2></div>
+<p class="lead">Gemini 3.8 Flash가 물리 도구를 직접 실행하지 않고, Cloud Run의 AnalysisAgent가 화이트리스트 스키마로 인자를 정규화하고 병렬 실행합니다.</p>
+<div class="callout teal"><p><strong>임의 코드 및 SQL 실행 차단 (AGENTS.md 준수):</strong> Gemini는 <code>rank_samples</code>, <code>explain_sample</code>, <code>sensor_drift</code>, <code>correlate</code> 등 사전 정의된 12대 Tool의 함수명과 JSON 인자만 제안할 수 있으며, 서버가 유효성을 검증한 뒤 내부 알고리즘으로 계산하여 수치 왜곡 없이 회신합니다.</p></div>
+<div class="code-block"><div class="code-top"><span>src/data_analysis/agent.py · 도구 실행 통제 핵심</span></div><pre><code># 1. 모델에 12대 Tool 스키마 전달 (Function Declarations)
+gen_config = {
+    "system_instruction": instructions,
+    "tools": [types.Tool(function_declarations=declarations)],
+    "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True)
+}
+
+# 2. 모델이 제안한 도구 호출(calls)을 서버가 직접 검증 및 실행
+for call in calls:
+    args = normalize_integers(call.name, call.args or {})
+    result = tools.execute(call.name, args)  # 격리된 데이터셋 범위에서 안전 실행
+    outputs.append(types.Part(function_response=types.FunctionResponse(name=call.name, id=call.id, response=result)))
+
+# 3. 계산된 실제 수치를 모델에 돌려주어 환각(Hallucination) 없는 최종 답변 생성
+contents.append(types.Content(role="user", parts=outputs))</code></pre></div>
+</section>
+
+<!-- Chapter 04 -->
+<section class="chapter" id="storage">
+<div class="chapter-head"><span class="num">04</span><h2>데이터 저장소 및 클라우드 인프라 보안 격리</h2></div>
+<div class="table-wrap"><table><thead><tr><th>영역</th><th>저장 내용</th><th>보안 관리 정책</th></tr></thead><tbody><tr><th>모바일 브라우저</th><td>Firebase Web Config (공개 키)</td><td>• <code>Browser key</code>에 <code>Identity Toolkit</code> 및 <code>Firestore</code> API 명시적 허용<br>• 서비스 계정 비밀키 및 Gemini 키 일절 미포함</td></tr><tr><th>Cloud Run 컨테이너</th><td>FastAPI 서버, 런타임 환경변수</td><td>• Cloud Run 인스턴스 메타데이터 토큰으로 Firestore 인증 통신<br>• <code>GOOGLE_CLOUD_PROJECT</code>, <code>REGION</code> 설정 및 전용 런타임 신원 분리</td></tr><tr><th>Google Firestore</th><td>사원 계정 프로필, 가입 승인 상태</td><td>• <code>project</code> 네임드 데이터베이스 내 <code>users</code> 컬렉션으로 격리<br>• 관리자 권한 API(<code>/api/admin/approve-user</code>)를 통해서만 상태 변경 허용</td></tr></tbody></table></div>
+</section>
+</main>
+</div>
+
+<footer class="footer"><p>⚙️ SEMI-GUARD v3.0 · Semiconductor Fab Quality AI Monitoring Platform</p><p><a href="#">맨 위로 ↑</a> · 2026-10-23 통합 배포 완료</p></footer>
+
+<dialog id="image-dialog"><div class="dialog-head"><p id="dialog-title">다이어그램 원본 확대</p><button class="dialog-close" type="button">✕ 닫기</button></div><div class="dialog-body"><img id="dialog-img" src="" alt=""></div></dialog>
+
+<script>
+(function(){
+  const dialog = document.getElementById('image-dialog');
+  const dImg = document.getElementById('dialog-img');
+  const dTitle = document.getElementById('dialog-title');
+  document.querySelectorAll('[data-zoom],[data-zoom-btn]').forEach(el => {
+    el.addEventListener('click', e => {
+      const fig = el.closest('figure');
+      const img = fig.querySelector('img');
+      dImg.src = img.src;
+      dTitle.textContent = fig.querySelector('figcaption strong').textContent + ' 확대';
+      dialog.showModal();
+    });
+  });
+  dialog.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+})();
+</script>
+</body>
+</html>

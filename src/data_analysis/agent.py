@@ -67,7 +67,7 @@ class AnalysisAgent:
 
     @property
     def configured(self):
-        return bool(self.client is not None or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
+        return bool(self.client is not None or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("K_SERVICE") or os.getenv("GOOGLE_CLOUD_PROJECT"))
 
     def answer(self, owner, dataset_id, query, conversation_id=None):
         from google import genai
@@ -78,9 +78,20 @@ class AnalysisAgent:
         if not self.configured:
             raise AgentUnavailable("Gemini 에이전트는 서버의 GEMINI_API_KEY (또는 GOOGLE_API_KEY) 설정이 필요합니다. 기본 분석과 Tool 직접 실행은 사용할 수 있습니다.")
         if self.client is None:
-            # Explicit choice avoids a general GOOGLE_API_KEY overriding a Gemini-specific key.
-            self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
-                                       http_options=types.HttpOptions(timeout=60000))
+            # 1. Try Vertex AI first (uses GCP 100만원 billing account & Cloud Run internal IAM - 100% secure)
+            project = os.getenv("GOOGLE_CLOUD_PROJECT") or os.getenv("GCP_PROJECT") or "iceu-songpa03"
+            location = os.getenv("GOOGLE_CLOUD_REGION") or "us-central1"
+            api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+            try:
+                self.client = genai.Client(vertexai=True, project=project, location=location,
+                                           http_options=types.HttpOptions(timeout=60000))
+                # For Vertex AI, gemini-2.5-flash is stable and supported
+                if not os.getenv("GEMINI_MODEL"):
+                    self.model = "gemini-2.5-flash"
+            except Exception:
+                # 2. Fallback to AI Studio API key
+                self.client = genai.Client(api_key=api_key,
+                                           http_options=types.HttpOptions(timeout=60000))
         history = self.service.repository.conversation(owner, dataset_id, conversation_id) if conversation_id else []
         conversation_id = conversation_id or str(uuid.uuid4())
         messages = history[-10:] + [{"role": "user", "content": query}]
@@ -94,13 +105,19 @@ class AnalysisAgent:
         trace = []
         for round_index in range(self.max_rounds):
             try:
-                response = self.client.models.generate_content(model=self.model, contents=list(contents),
-                    config=types.GenerateContentConfig(system_instruction=instructions,
-                        tools=[types.Tool(function_declarations=declarations)],
-                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-                        tool_config=types.ToolConfig(function_calling_config=types.FunctionCallingConfig(
-                            mode="ANY" if round_index == 0 else "AUTO")),
-                        thinking_config=types.ThinkingConfig(thinking_level="low"), max_output_tokens=4096))
+                gen_config = {
+                    "system_instruction": instructions,
+                    "tools": [types.Tool(function_declarations=declarations)],
+                    "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True),
+                    "tool_config": types.ToolConfig(function_calling_config=types.FunctionCallingConfig(
+                        mode="ANY" if round_index == 0 else "AUTO")),
+                    "max_output_tokens": 4096,
+                }
+                if any(k in self.model for k in ["gemini-3", "gemini-4"]):
+                    gen_config["thinking_config"] = types.ThinkingConfig(thinking_level="low")
+                response = self.client.models.generate_content(
+                    model=self.model, contents=list(contents),
+                    config=types.GenerateContentConfig(**gen_config))
             except (errors.APIError, httpx.HTTPError) as exc:
                 code = getattr(exc, "code", None)
                 raise AgentUnavailable(f"Gemini 연결 또는 모델 설정을 확인해 주세요 (상태 {code or '연결 실패'}). 기본 분석과 Tool 직접 실행은 계속 사용할 수 있습니다.") from exc

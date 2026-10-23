@@ -64,7 +64,7 @@ window.SemiDiagnostics = (() => {
     // ─────────────────────────────────────────────────────────────
     // 1. TOP WAFER OVERVIEW & HIGH-PRIORITY ACTION HEADER CARD
     // ─────────────────────────────────────────────────────────────
-    const headerCard = el('div', 'card');
+    const headerCard = el('div', 'card diagnostic-header-card');
     headerCard.style.padding = '22px 26px';
     headerCard.style.background = '#ffffff';
     headerCard.style.borderRadius = '12px';
@@ -76,7 +76,7 @@ window.SemiDiagnostics = (() => {
     headerCard.style.flexWrap = 'wrap';
     headerCard.style.gap = '16px';
 
-    const headerLeft = el('div');
+    const headerLeft = el('div', 'header-left');
     const titleRow = el('div');
     titleRow.style.display = 'flex';
     titleRow.style.alignItems = 'center';
@@ -99,19 +99,19 @@ window.SemiDiagnostics = (() => {
     subText.style.color = '#64748b';
     headerLeft.append(titleRow, subText);
 
-    const metricsBox = el('div');
+    const metricsBox = el('div', 'metrics-box');
     metricsBox.style.display = 'flex';
     metricsBox.style.gap = '16px';
     metricsBox.style.alignItems = 'center';
 
-    const riskBox = el('div');
+    const riskBox = el('div', 'risk-box');
     riskBox.style.textAlign = 'right';
     riskBox.innerHTML = `
       <div style="font-size:0.75rem; color:#64748b; font-weight:700;">불량 위험 점수 (Risk Score)</div>
       <div style="font-size:1.65rem; font-weight:900; color:${isHighRisk ? '#dc2626' : '#2563eb'};">${pct(r.risk_score)}</div>
     `;
 
-    const actionBtnGroup = el('div');
+    const actionBtnGroup = el('div', 'action-btn-group');
     actionBtnGroup.style.display = 'flex';
     actionBtnGroup.style.gap = '8px';
     if (onQuestion) {
@@ -133,22 +133,21 @@ window.SemiDiagnostics = (() => {
 
 
     // ─────────────────────────────────────────────────────────────
-    // 2. MAIN TWO-COLUMN GRID
+    // 2. MAIN TWO-COLUMN GRID (CSS-controlled responsive layout)
     // ─────────────────────────────────────────────────────────────
-    const grid = el('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(490px, 1fr))';
-    grid.style.gap = '20px';
+    const grid = el('div', 'diagnostic-main-grid');
 
     // ─────────────────────────────────────────────────────────────
     // CARD A: 🧠 SHAP 인공지능 원인 분해 워터폴 (XAI)
     // ─────────────────────────────────────────────────────────────
-    const shapCard = el('div', 'card');
+    const shapCard = el('div', 'card diagnostic-card-a');
     shapCard.style.padding = '22px 24px';
     shapCard.style.background = '#ffffff';
     shapCard.style.borderRadius = '12px';
     shapCard.style.border = '1px solid var(--border-color)';
     shapCard.style.boxShadow = 'var(--shadow-sm)';
+    shapCard.style.boxSizing = 'border-box';
+    shapCard.style.width = '100%';
 
     const shapHeader = el('div');
     shapHeader.style.display = 'flex';
@@ -176,6 +175,8 @@ window.SemiDiagnostics = (() => {
     shapDesc.style.fontSize = '0.86rem';
     shapDesc.style.color = '#64748b';
     shapDesc.style.margin = '0 0 16px 0';
+    shapDesc.style.wordBreak = 'keep-all';
+    shapDesc.style.lineHeight = '1.45';
     shapCard.append(shapHeader, shapDesc);
 
     // Full positive (risk-increase) sensors + negative (risk-decrease) sensors
@@ -210,6 +211,9 @@ window.SemiDiagnostics = (() => {
     // Dynamic PdM Recommendation Box (사용자 첨부 이미지와 100% 동일한 비주얼)
     // ─────────────────────────────────────────────────────────────
     const pdmCard = el('div', 'pdm-recommendation-card');
+    pdmCard.style.boxSizing = 'border-box';
+    pdmCard.style.width = '100%';
+    pdmCard.style.wordBreak = 'keep-all';
     let recTitle = `🛡️ 현장 설비 예방보전(PdM) 권고 (웨이퍼 #${r.sample_id} - `;
     let recBadgeText = '예방보전 (양품 통과)';
     let recBadgeClass = 'warning';
@@ -260,12 +264,14 @@ window.SemiDiagnostics = (() => {
     // CARD B: 🛠️ 점검해야 할 핵심 센서 전수 목록 & 현장 조치 가이드
     // (정상 여부와 상관없이 위험도 높은 센서부터 빠짐없이 다 알려줌!)
     // ─────────────────────────────────────────────────────────────
-    const inspectCard = el('div', 'card');
+    const inspectCard = el('div', 'card diagnostic-card-b');
     inspectCard.style.padding = '22px 24px';
     inspectCard.style.background = '#ffffff';
     inspectCard.style.borderRadius = '12px';
     inspectCard.style.border = '1px solid var(--border-color)';
     inspectCard.style.boxShadow = 'var(--shadow-sm)';
+    inspectCard.style.boxSizing = 'border-box';
+    inspectCard.style.width = '100%';
 
     const inspectHeader = el('div');
     inspectHeader.style.marginBottom = '14px';

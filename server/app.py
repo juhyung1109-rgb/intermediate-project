@@ -20,7 +20,9 @@ from src.data_analysis.inference import ModelService
 from src.data_analysis.repository import create_repository
 from src.data_analysis.service import DatasetService
 from src.data_analysis.validation import DataError, clean_json
-from server.user_sync import UserSyncRequest, sync_user_to_firestore
+from server.user_sync import (UserSyncRequest, sync_user_to_firestore, 
+                              get_user_status, list_all_users, 
+                              approve_user_status, ApproveUserRequest)
 from server.dashboard_api import create_dashboard_router
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -47,6 +49,12 @@ async def dataset_session(request: Request, call_next):
         token = secrets.token_hex(32)
         response.set_cookie("semiguard_analysis_session", token, httponly=True, samesite="lax",
                             secure=request.url.scheme == "https", max_age=60*60*24*7)
+    # Prevent browser caching of frontend application assets
+    path = request.url.path
+    if path.endswith((".js", ".html", ".css")) or path == "/" or path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 
@@ -77,6 +85,9 @@ def health():
 
 # Retain the existing account-profile integration; dataset access uses server sessions.
 app.post("/api/sync-user")(sync_user_to_firestore)
+app.get("/api/user-status/{uid}")(get_user_status)
+app.get("/api/admin/users")(list_all_users)
+app.post("/api/admin/approve-user")(approve_user_status)
 
 
 @app.post("/api/predict-batch")
@@ -214,8 +225,13 @@ def seed_default_dataset_if_empty():
         print("[SEMI-GUARD] Pre-seed notice:", e)
 
 seed_default_dataset_if_empty()
-
 app.include_router(create_dashboard_router(service))
-app.mount("/picture", StaticFiles(directory=BASE_DIR / "picture"), name="picture")
-app.mount("/assets", StaticFiles(directory=BASE_DIR / "docs/assets"), name="proposal-assets")
+
+picture_dir = BASE_DIR / "picture"
+picture_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/picture", StaticFiles(directory=picture_dir), name="picture")
+
+assets_dir = BASE_DIR / "docs/assets"
+assets_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/assets", StaticFiles(directory=assets_dir), name="proposal-assets")
 app.mount("/", StaticFiles(directory=BASE_DIR / "web", html=True), name="web")

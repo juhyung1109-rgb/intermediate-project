@@ -14,3 +14,11 @@ runtime/
 *.pptx
 artifacts/analysis_reports/*.sqlite3*
 picture/*.psd
+picture/*.html
+data/raw/
+raw/
+tests/
+tools/
+docs/*.docx
+docs/SECOM_*.html
+*.sqlite3*

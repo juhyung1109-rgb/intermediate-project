@@ -30,7 +30,7 @@ $DeployArgs = @("run", "deploy", $ServiceName, "--image", $ImageTag,
     "--region", $Region, "--platform", "managed", "--allow-unauthenticated",
     "--memory", "2Gi", "--cpu", "1", "--port", "8080", "--min-instances", "0", "--max-instances", "3")
 
-$EnvVars = @()
+$EnvVars = @("GOOGLE_CLOUD_PROJECT=$ProjectId", "GOOGLE_CLOUD_REGION=$Region")
 if ($DatasetBucket -ne "") {
     $EnvVars += "DATASET_STORAGE=gcs,DATASET_BUCKET=$DatasetBucket"
 } else {

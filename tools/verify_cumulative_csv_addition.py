@@ -100,7 +100,7 @@ def run_cumulative_verification():
     model = joblib.load(os.path.join(ARTIFACTS_DIR, "baseline_model.joblib"))
     
     # 2. Load baseline 814 wafers
-    test_batch_path = os.path.join(ARTIFACTS_DIR, "secom_test_batch_200811_200903.csv")
+    test_batch_path = os.path.join(SIMULATION_DIR, "secom_test_batch_200811_200903.csv")
     test_df_500 = pd.read_csv(test_batch_path)
     
     # Load 314 initial historical wafers from raw SECOM

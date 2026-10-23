@@ -43,4 +43,7 @@ runtime/
 !.env.example
 .pytest_cache/
 artifacts/analysis_reports/*.sqlite3*
+picture/*.html
+picture/*.psd
+scratch/
 

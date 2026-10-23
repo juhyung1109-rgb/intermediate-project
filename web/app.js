@@ -115,14 +115,17 @@ function url(part, extra = {}) {
 // SVG Graph Generator
 function graph(title, x, y, line = false) {
   const ns = 'http://www.w3.org/2000/svg', s = document.createElementNS(ns, 'svg');
-  s.setAttribute('viewBox', '0 0 740 310');
+  s.setAttribute('viewBox', '-15 0 765 325');
   s.setAttribute('aria-label', title);
   s.setAttribute('role', 'img');
   s.classList.add('chart');
+  s.style.display = 'block';
   s.style.width = '100%';
+  s.style.maxWidth = '100%';
   s.style.height = 'auto';
   s.style.background = '#ffffff';
   s.style.borderRadius = '8px';
+  s.style.boxSizing = 'border-box';
 
   function add(tag, attrs, text) {
     const n = document.createElementNS(ns, tag);
@@ -138,44 +141,62 @@ function graph(title, x, y, line = false) {
   const hi = Math.max(0, ...values) || 1;
   const range = hi - lo || 1;
   const py = v => 220 - (v - lo) / range * 165;
-  const w = 650 / Math.max(1, x.length);
+  const w = 640 / Math.max(1, x.length);
 
-  add('line', { x1: 50, y1: py(0), x2: 715, y2: py(0), stroke: '#cbd5e1' });
-  add('text', { x: 5, y: 58, 'font-size': 11, fill: '#64748b' }, format(hi));
-  add('text', { x: 5, y: 225, 'font-size': 11, fill: '#64748b' }, format(lo));
+  add('line', { x1: 58, y1: py(0), x2: 730, y2: py(0), stroke: '#cbd5e1' });
+  add('text', { x: 52, y: 58, 'font-size': 11, 'text-anchor': 'end', fill: '#64748b', 'font-weight': '600' }, format(hi));
+  add('text', { x: 52, y: 225, 'font-size': 11, 'text-anchor': 'end', fill: '#64748b', 'font-weight': '600' }, format(lo));
 
   let previous = null;
   y.forEach((v, i) => {
     if (v == null || !Number.isFinite(v)) { previous = null; return; }
-    const px = 55 + w * (i + 0.5);
+    const px = 68 + w * (i + 0.5);
     let node;
     if (line) {
       if (previous) add('line', { x1: previous[0], y1: previous[1], x2: px, y2: py(v), stroke: '#2563eb', 'stroke-width': 2.5 });
-      node = add('circle', { cx: px, cy: py(v), r: 3.5, fill: '#2563eb' });
+      node = add('circle', { cx: px, cy: py(v), r: 4, fill: '#2563eb' });
       previous = [px, py(v)];
     } else {
       node = add('rect', {
         x: px - w * 0.32, y: Math.min(py(v), py(0)),
-        width: Math.max(2, w * 0.64), height: Math.max(2, Math.abs(py(v) - py(0))),
+        width: Math.max(3, w * 0.64), height: Math.max(2, Math.abs(py(v) - py(0))),
         fill: v < 0 ? '#10b981' : '#ef4444', rx: 2
       });
     }
     const tip = document.createElementNS(ns, 'title');
     tip.textContent = `${x[i]}: ${format(v)}`;
     node.append(tip);
+
+    // Visible numerical labels above points/bars for up to 16 data points
+    if (x.length <= 16) {
+      const isUp = py(v) <= py(0);
+      const valY = isUp ? Math.max(38, py(v) - 8) : Math.min(235, py(v) + 14);
+      add('text', {
+        x: px,
+        y: valY,
+        'font-size': 10,
+        'font-weight': '700',
+        fill: v < 0 ? '#059669' : '#dc2626',
+        'text-anchor': 'middle'
+      }, format(v));
+    }
+
     if (x.length <= 16 || i % Math.ceil(x.length / 10) === 0) {
-      add('text', { x: px, y: 245, 'font-size': 10, fill: '#64748b', transform: `rotate(35 ${px} 245)` }, x[i]);
+      add('text', { x: px, y: 248, 'font-size': 10, fill: '#64748b', transform: `rotate(35 ${px} 248)` }, x[i]);
     }
   });
   return s;
 }
 
 function graphCard(title, x, y, line = false) {
-  const c = el('div', null, 'card');
+  const c = el('div', null, 'card graph-container-card');
   c.style.padding = '20px';
   c.style.background = '#ffffff';
   c.style.borderRadius = '12px';
   c.style.border = '1px solid var(--border-color)';
+  c.style.boxSizing = 'border-box';
+  c.style.width = '100%';
+  c.style.overflowX = 'hidden';
 
   const header = el('div');
   header.style.display = 'flex';
@@ -249,11 +270,13 @@ function table(rows, keys = null, action = null) {
 }
 
 function metricsCard(items) {
-  const grid = el('div');
+  const grid = el('div', null, 'metrics-summary-grid');
   grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(180px, 1fr))';
-  grid.style.gap = '14px';
+  grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(135px, 1fr))';
+  grid.style.gap = '12px';
   grid.style.marginBottom = '20px';
+  grid.style.width = '100%';
+  grid.style.boxSizing = 'border-box';
 
   items.forEach(([name, value, note]) => {
     const m = el('div');
@@ -284,9 +307,9 @@ function metricsCard(items) {
   return grid;
 }
 
-// Role Permissions Matrix (관리자와 엔지니어 모두 일상점검/예지보전 view-pdm 접근 및 관리 가능)
+// Role Permissions Matrix (관리자와 엔지니어 모두 일상점검/예지보전 view-pdm 접근 및 관리 가능, 업로드/초기화 관리는 관리자 전용)
 const ROLE_PERMISSIONS = {
-  engineer: ['view-hub', 'view-triage', 'view-shap-summary', 'view-sim', 'view-pdm', 'view-admin-wiki'],
+  engineer: ['view-hub', 'view-triage', 'view-shap-summary', 'view-sim', 'view-pdm'],
   admin: ['view-hub', 'view-admin-yield', 'view-admin-perf', 'view-admin-confusion', 'view-admin-drift', 'view-admin-wiki', 'view-triage', 'view-pdm']
 };
 
@@ -323,6 +346,18 @@ window.switchRole = function(role) {
   const admBtn = $('role-btn-admin');
   if (engBtn) engBtn.classList.toggle('active', role === 'engineer');
   if (admBtn) admBtn.classList.toggle('active', role === 'admin');
+
+  // 상단 글로벌 툴바 권한 분기: 업로드, 초기화, 가입 승인 버튼은 관리자(admin) 전용, 엔지니어는 숨김
+  const topUploadBtn = $('btn-top-upload');
+  const topResetBtn = $('btn-top-reset');
+  const topApprovalBtn = $('btn-top-user-approval');
+  if (topUploadBtn) topUploadBtn.style.display = (role === 'admin') ? 'inline-flex' : 'none';
+  if (topResetBtn) topResetBtn.style.display = (role === 'admin') ? 'inline-flex' : 'none';
+  if (topApprovalBtn) topApprovalBtn.style.display = (role === 'admin') ? 'inline-flex' : 'none';
+
+  if (role === 'admin') {
+    updatePendingBadge();
+  }
 
   const engSec = $('hub-engineer-section');
   const admSec = $('hub-admin-section');
@@ -564,17 +599,19 @@ async function runCompareShap() {
   ]);
 
   container.replaceChildren();
-  const grid = el('div');
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = state.shapMode === 'both' ? '1fr 1fr' : '1fr';
-  grid.style.gap = '20px';
+  const grid = el('div', null, 'shap-comparison-grid');
+  if (state.shapMode !== 'both') {
+    grid.classList.add('single-column');
+  }
 
   if (state.shapMode !== 'fp') {
-    const cardTp = el('div', null, 'card');
+    const cardTp = el('div', null, 'card shap-compare-card');
     cardTp.style.padding = '18px';
     cardTp.style.background = '#ffffff';
     cardTp.style.borderRadius = '12px';
     cardTp.style.border = '1px solid var(--border-color)';
+    cardTp.style.boxSizing = 'border-box';
+    cardTp.style.width = '100%';
     cardTp.append(el('h3', '🚨 진짜 불량 표본 (TP) 원인 분해', 'card-title'));
     if (tpData) cardTp.append(window.SemiDiagnostics.render(tpData, { compact: true }));
     else cardTp.append(el('p', '선택된 TP 표본이 없습니다.', 'muted'));
@@ -582,11 +619,13 @@ async function runCompareShap() {
   }
 
   if (state.shapMode !== 'tp') {
-    const cardFp = el('div', null, 'card');
+    const cardFp = el('div', null, 'card shap-compare-card');
     cardFp.style.padding = '18px';
     cardFp.style.background = '#ffffff';
     cardFp.style.borderRadius = '12px';
     cardFp.style.border = '1px solid var(--border-color)';
+    cardFp.style.boxSizing = 'border-box';
+    cardFp.style.width = '100%';
     cardFp.append(el('h3', '⚠️ 가양성 안전마진 표본 (FP) 원인 분해', 'card-title'));
     if (fpData) cardFp.append(window.SemiDiagnostics.render(fpData, { compact: true }));
     else cardFp.append(el('p', '선택된 FP 표본이 없습니다.', 'muted'));
@@ -1375,11 +1414,13 @@ async function renderAdminPdmReview() {
   card.append(topRow);
 
   // 미니 파이프라인 4단계 바
-  const statusSummary = el('div');
+  const statusSummary = el('div', null, 'pdm-mini-pipeline');
   statusSummary.style.display = 'grid';
-  statusSummary.style.gridTemplateColumns = 'repeat(auto-fit, minmax(180px, 1fr))';
+  statusSummary.style.gridTemplateColumns = 'repeat(auto-fit, minmax(130px, 1fr))';
   statusSummary.style.gap = '10px';
   statusSummary.style.marginBottom = '20px';
+  statusSummary.style.width = '100%';
+  statusSummary.style.boxSizing = 'border-box';
   statusSummary.innerHTML = `
     <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:10px 14px;">
       <div style="font-size:0.76rem; color:#dc2626; font-weight:700;">1. 점검 발령 접수</div>
@@ -1595,8 +1636,10 @@ $('csv-upload-form').onsubmit = e => {
     const res = await api('/api/predict-batch', { method: 'POST', body: formData });
     await loadDatasetList(res.dataset_id);
     await refreshGlobalData(true);
-    showToast(`✅ ${file.name} 분석 완료! 불량 위험도 1위 웨이퍼의 SHAP 워터폴 및 긴급 점검 센서 목록을 표시합니다.`);
-    navigateTo('view-triage');
+    navigateTo('view-admin-wiki');
+    renderDataQuality();
+    showToast(`✅ ${file.name} 업로드 및 배치 추론이 완료되었습니다. 현재 공정 데이터셋으로 반영되었습니다.`);
+    $('csv-file-input').value = '';
   });
 };
 
@@ -1605,11 +1648,13 @@ $('sim-data-form').onsubmit = e => {
   busy(e.submitter, async () => {
     const filename = $('sim-data-select').value;
     if (!filename) return;
+    showToast(`📁 ${filename} 분석 및 모델 추론을 시작합니다...`);
     const res = await post(`/api/simulation/${encodeURIComponent(filename)}/analyze`, {});
     await loadDatasetList(res.dataset_id);
     await refreshGlobalData(true);
-    showToast(`✅ ${filename} 분석 완료! 불량 위험도 1위 웨이퍼의 SHAP 워터폴 및 긴급 점검 센서 목록을 표시합니다.`);
-    navigateTo('view-triage');
+    navigateTo('view-admin-wiki');
+    renderDataQuality();
+    showToast(`✅ ${filename} 시뮬레이션 파일 분석 완료! 현재 공정 데이터셋으로 반영되었습니다.`);
   });
 };
 
@@ -1809,14 +1854,16 @@ $('header-logout-btn').onclick = async () => {
   $('auth-gate-screen').style.display = 'flex';
 };
 
-// Firebase Form Handlers
+// Firebase Form Handlers & Admin Approval System
 let isSignup = false;
 $('gate-tab-signup').onclick = () => {
   isSignup = true;
   $('gate-tab-signup').classList.add('active');
   $('gate-tab-login').classList.remove('active');
   $('gate-name-group').style.display = 'block';
-  $('gate-submit-btn').querySelector('span').textContent = '신규 회원가입 (Firebase)';
+  $('gate-submit-btn').querySelector('span').textContent = '신규 회원가입 (승인 요청)';
+  if ($('gate-success-box')) $('gate-success-box').style.display = 'none';
+  if ($('gate-error-msg')) $('gate-error-msg').style.display = 'none';
 };
 
 $('gate-tab-login').onclick = () => {
@@ -1825,12 +1872,15 @@ $('gate-tab-login').onclick = () => {
   $('gate-tab-signup').classList.remove('active');
   $('gate-name-group').style.display = 'none';
   $('gate-submit-btn').querySelector('span').textContent = '로그인';
+  if ($('gate-error-msg')) $('gate-error-msg').style.display = 'none';
 };
 
 $('gate-auth-form').onsubmit = e => {
   e.preventDefault();
   const errBox = $('gate-error-msg');
+  const successBox = $('gate-success-box');
   if (errBox) errBox.style.display = 'none';
+  if (successBox && !isSignup) successBox.style.display = 'none';
 
   busy($('gate-submit-btn'), async () => {
     if (typeof firebaseAuth === 'undefined' || !firebaseAuth) {
@@ -1842,25 +1892,37 @@ $('gate-auth-form').onsubmit = e => {
     const nameInput = $('gate-name') ? $('gate-name').value.trim() : '';
 
     try {
-      let userRes;
       if (isSignup) {
-        userRes = await firebaseAuth.createUserWithEmailAndPassword(email, pw);
-        if (nameInput && userRes.user.updateProfile) {
-          try { await userRes.user.updateProfile({ displayName: nameInput }); } catch(err) {}
+        // Sign Up: Requires Admin Approval
+        const signupRes = await handleFirebaseSignUp(email, pw, role, nameInput);
+        $('gate-password').value = '';
+        if (errBox) errBox.style.display = 'none';
+        
+        if (signupRes.status === 'pending' || !signupRes.isApproved) {
+          if (successBox) successBox.style.display = 'block';
+          $('gate-tab-login').click();
+          showToast('🎉 회원가입 신청이 안전하게 접수되었습니다. 공정 관리자(Admin) 승인 후 로그인해 주세요.');
+          return;
+        } else {
+          // Pre-approved admin account
+          await enterApp(role, signupRes.displayName || email, false);
+          return;
         }
-        setUserProfile(userRes.user.uid, role, nameInput || email.split('@')[0], email);
       } else {
-        userRes = await firebaseAuth.signInWithEmailAndPassword(email, pw);
-        setUserProfile(userRes.user.uid, role, userRes.user.displayName || email.split('@')[0], email);
+        // Sign In: Validates Admin Approval
+        const signinRes = await handleFirebaseSignIn(email, pw, role);
+        $('gate-password').value = '';
+        if (errBox) errBox.style.display = 'none';
+        await enterApp(signinRes.role, signinRes.displayName || email, false);
       }
-
-      $('gate-password').value = '';
-      if (errBox) errBox.style.display = 'none';
-      await enterApp(role, userRes.user.displayName || userRes.user.email, false);
     } catch (authErr) {
       console.error('Firebase Auth Error:', authErr);
       let msg = authErr.message;
-      if (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/wrong-password') {
+      if (authErr.code === 'auth/approval-pending') {
+        msg = '⏳ [가입 승인 대기 중] 관리자의 승인이 아직 완료되지 않은 계정입니다. 사내 공정 관리자(Admin)에게 승인을 요청해 주세요.';
+      } else if (authErr.code === 'auth/approval-rejected') {
+        msg = '❌ [가입 반려] 회원가입 신청이 반려된 계정입니다. 공정 관리자에게 문의해 주세요.';
+      } else if (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/wrong-password') {
         msg = '비밀번호가 일치하지 않거나 유효하지 않은 로그인 정보입니다. 비밀번호를 다시 확인해 주세요.';
       } else if (authErr.code === 'auth/user-not-found') {
         msg = '등록되지 않은 사내 이메일 계정입니다. [신규 회원가입] 탭을 눌러 가입해 주세요.';
@@ -1870,6 +1932,8 @@ $('gate-auth-form').onsubmit = e => {
         msg = '비밀번호는 최소 6자 이상이어야 합니다.';
       } else if (authErr.code === 'auth/invalid-email') {
         msg = '올바른 이메일 주소 형식을 입력해 주세요.';
+      } else if (authErr.message && authErr.message.includes('signup-are-blocked')) {
+        msg = 'Google Cloud API 키 제한으로 인해 계정 생성이 차단되었습니다. 방금 API 키 설정이 복구되었으니 잠시 후 다시 시도해 주세요.';
       }
       if (errBox) {
         errBox.textContent = `⚠️ ${msg}`;
@@ -1880,17 +1944,159 @@ $('gate-auth-form').onsubmit = e => {
   });
 };
 
-// Automatic login if active Firebase session exists
+// Automatic login if active Firebase session exists & is approved
 if (typeof setupFirebaseAuthObserver === 'function') {
   setupFirebaseAuthObserver(async (authData) => {
-    if (authData && authData.isLoggedIn && authData.user) {
-      console.log('Firebase active session detected:', authData.user.email);
+    if (authData && authData.isLoggedIn && authData.email) {
+      console.log('Firebase active approved session:', authData.email);
       const role = authData.role || 'engineer';
-      const name = authData.displayName || authData.user.email;
+      const name = authData.name || authData.email;
       const gateScreen = $('auth-gate-screen');
       if (gateScreen && gateScreen.style.display !== 'none') {
         await enterApp(role, name, false);
       }
+    } else if (authData && authData.isPending) {
+      const errBox = $('gate-error-msg');
+      if (errBox) {
+        errBox.textContent = `⚠️ ⏳ [가입 승인 대기 중] 관리자 승인 대기 중인 계정(${authData.email})입니다. 사내 공정 관리자 승인 완료 후 이용 가능합니다.`;
+        errBox.style.display = 'block';
+      }
     }
   });
 }
+
+// ============================================================================
+// ADMIN USER APPROVAL MANAGEMENT MODAL LOGIC
+// ============================================================================
+let currentApprovalFilter = 'all';
+
+async function updatePendingBadge() {
+  try {
+    const data = await fetchAdminUserList();
+    const count = data.pendingCount || 0;
+    const topBadge = $('top-pending-badge');
+    const hubBadge = $('hub-pending-badge');
+    if (topBadge) {
+      topBadge.textContent = count;
+      topBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+    if (hubBadge) {
+      hubBadge.textContent = `대기 ${count}명`;
+      hubBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+  } catch(e) {}
+}
+
+window.openUserApprovalModal = async function() {
+  const dialog = $('user-approval-dialog');
+  if (!dialog) return;
+  dialog.showModal();
+  await loadUserApprovalList(currentApprovalFilter);
+};
+
+window.loadUserApprovalList = async function(filter = 'all') {
+  currentApprovalFilter = filter;
+  const tbody = $('user-approval-table-body');
+  if (!tbody) return;
+
+  // Filter tab buttons active style
+  ['all', 'pending', 'approved'].forEach(f => {
+    const btn = $(`filter-user-${f}`);
+    if (btn) {
+      btn.style.background = f === filter ? '#eff6ff' : '#ffffff';
+      btn.style.borderColor = f === filter ? '#93c5fd' : '#cbd5e1';
+      btn.style.color = f === filter ? '#1d4ed8' : '#475569';
+      btn.style.fontWeight = f === filter ? '700' : '600';
+    }
+  });
+
+  tbody.innerHTML = `<tr><td colspan="6" style="padding:28px; text-align:center; color:#64748b;">⏳ 사용자 목록 조회 중...</td></tr>`;
+
+  try {
+    const data = await fetchAdminUserList();
+    const allUsers = data.users || [];
+    
+    // Update counters
+    const countAll = $('count-all-users');
+    const countPending = $('count-pending-users');
+    const countApproved = $('count-approved-users');
+    if (countAll) countAll.textContent = allUsers.length;
+    if (countPending) countPending.textContent = data.pendingCount || 0;
+    if (countApproved) countApproved.textContent = allUsers.filter(u => u.status === 'approved').length;
+
+    updatePendingBadge();
+
+    let filtered = allUsers;
+    if (filter === 'pending') {
+      filtered = allUsers.filter(u => u.status === 'pending');
+    } else if (filter === 'approved') {
+      filtered = allUsers.filter(u => u.status === 'approved');
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:32px; text-align:center; color:#94a3b8; font-size:0.9rem;">해당 상태의 사용자가 없습니다.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const isPend = u.status === 'pending';
+      const isAppr = u.status === 'approved';
+      const statusBadge = isPend 
+        ? `<span style="background:#fef3c7; color:#92400e; padding:3px 9px; border-radius:99px; font-size:0.75rem; font-weight:700; border:1px solid #fde68a;">⏳ 승인 대기</span>`
+        : isAppr 
+        ? `<span style="background:#ecfdf5; color:#065f46; padding:3px 9px; border-radius:99px; font-size:0.75rem; font-weight:700; border:1px solid #a7f3d0;">✅ 승인 완료</span>`
+        : `<span style="background:#fee2e2; color:#991b1b; padding:3px 9px; border-radius:99px; font-size:0.75rem; font-weight:700; border:1px solid #fca5a5;">❌ 반려됨</span>`;
+      
+      const roleBadge = u.role === 'admin'
+        ? `<span style="background:#eff6ff; color:#1e40af; font-size:0.76rem; padding:2px 8px; border-radius:4px; font-weight:600;">👨‍💼 공정 관리자</span>`
+        : `<span style="background:#f1f5f9; color:#334155; font-size:0.76rem; padding:2px 8px; border-radius:4px; font-weight:600;">👷 현장 엔지니어</span>`;
+
+      const reqDate = u.requestedAt ? new Date(u.requestedAt).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '-';
+
+      const actions = isPend 
+        ? `<div style="display:flex; gap:6px; justify-content:center;">
+             <button type="button" class="action-btn" style="padding:4px 10px; font-size:0.78rem; background:#10b981; color:#fff; border:none; font-weight:700;" onclick="handleUserApproval('${u.uid}', true, '${u.email}')">승인</button>
+             <button type="button" class="action-btn" style="padding:4px 10px; font-size:0.78rem; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;" onclick="handleUserApproval('${u.uid}', false, '${u.email}')">반려</button>
+           </div>`
+        : `<div style="display:flex; gap:6px; justify-content:center;">
+             <button type="button" class="action-btn" style="padding:3px 8px; font-size:0.75rem; color:#64748b;" onclick="handleUserApproval('${u.uid}', ${!isAppr}, '${u.email}')">${isAppr ? '반려로 변경' : '재승인'}</button>
+           </div>`;
+
+      return `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:12px 14px; font-weight:700; color:#0f172a;">${u.name || '-'}</td>
+          <td style="padding:12px 14px; font-family:monospace; color:#334155;">${u.email}</td>
+          <td style="padding:12px 14px;">${roleBadge}</td>
+          <td style="padding:12px 14px; font-size:0.78rem; color:#64748b;">${reqDate}</td>
+          <td style="padding:12px 14px; text-align:center;">${statusBadge}</td>
+          <td style="padding:12px 14px; text-align:center;">${actions}</td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch(err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="padding:24px; text-align:center; color:#ef4444;">오류 발생: ${err.message}</td></tr>`;
+  }
+};
+
+window.handleUserApproval = async function(uid, approve, email) {
+  const actionName = approve ? '가입 승인' : '가입 반려';
+  if (!confirm(`[${email}] 사용자의 ${actionName} 처리를 진행하시겠습니까?`)) return;
+  try {
+    const currentAdmin = (typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser && firebaseAuth.currentUser.email) || 'admin@semiguard.fab';
+    await approveUserAccount(uid, approve, currentAdmin);
+    showToast(`✅ [${email}] 사원의 ${actionName}이 완료되었습니다.`);
+    await loadUserApprovalList(currentApprovalFilter);
+    updatePendingBadge();
+  } catch(err) {
+    showToast(`❌ ${actionName} 실패: ` + err.message, true);
+  }
+};
+
+// Event listeners for approval modal
+$('btn-close-approval-modal')?.addEventListener('click', () => $('user-approval-dialog')?.close());
+$('filter-user-all')?.addEventListener('click', () => loadUserApprovalList('all'));
+$('filter-user-pending')?.addEventListener('click', () => loadUserApprovalList('pending'));
+$('filter-user-approved')?.addEventListener('click', () => loadUserApprovalList('approved'));
+$('btn-refresh-users')?.addEventListener('click', () => loadUserApprovalList(currentApprovalFilter));
+

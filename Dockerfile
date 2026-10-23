@@ -11,6 +11,8 @@ COPY src/ ./src/
 COPY simulation/ ./simulation/
 COPY web/ ./web/
 COPY docs/ ./docs/
+COPY picture/ ./picture/
+RUN mkdir -p runtime
 ENV PORT=8080
 EXPOSE 8080
 CMD ["sh", "-c", "uvicorn server.app:app --host 0.0.0.0 --port ${PORT:-8080}"]

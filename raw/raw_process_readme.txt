@@ -1,1 +1,0 @@
-SEMI-GUARD Raw Process Data Directory\nGround truth files stored here are read-only for LLM Agents.
